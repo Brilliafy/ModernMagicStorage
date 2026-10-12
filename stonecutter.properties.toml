@@ -3,7 +3,7 @@ loomx.loom_version = "1.18-SNAPSHOT"
 [mod]
 id = "magicstorage"
 name = "Modern Magic Storage"
-group = "com.brilliafy.magicstorage"
+group = "com.brilliafy"
 version = "2.0.0"
 channel_tag = ""
 description = "A Terraria-inspired storage network mod for Minecraft — modern multi-loader edition supporting Fabric, NeoForge, and Forge."

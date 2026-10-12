@@ -2,6 +2,7 @@ package com.brilliafy.magicstorage.block;
 
 import com.brilliafy.magicstorage.blockentity.StorageUnitBlockEntity;
 import com.brilliafy.magicstorage.item.ItemStorageUpgrade;
+import com.brilliafy.magicstorage.storage.NetworkLocator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -56,6 +57,28 @@ public class BlockStorageUnit extends BaseEntityBlock {
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new StorageUnitBlockEntity(pos, state, capacity);
     }
+
+    @Override
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+        super.onPlace(state, level, pos, oldState, isMoving);
+        NetworkLocator.markNetworkDirty(level, pos);
+    }
+
+    //? >= 26.1 {
+    /*@Override
+    protected void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+        NetworkLocator.markNetworkDirty(level, pos);
+    }
+    *///?} < 26.1 {
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            NetworkLocator.markNetworkDirty(level, pos);
+        }
+        super.onRemove(state, level, pos, newState, isMoving);
+    }
+    //?}
 
     //? >= 26.1 {
     /*@Override

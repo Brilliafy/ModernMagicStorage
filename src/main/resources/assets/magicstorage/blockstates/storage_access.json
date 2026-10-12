@@ -1,7 +1,7 @@
 {
   "variants": {
-    "normal": {
-      "model": "magicstorage:storage_access"
+    "": {
+      "model": "magicstorage:block/storage_access"
     }
   }
 }

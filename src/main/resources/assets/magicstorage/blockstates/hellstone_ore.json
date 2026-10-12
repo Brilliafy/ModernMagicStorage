@@ -1,7 +1,7 @@
 {
   "variants": {
-    "normal": {
-      "model": "magicstorage:hellstone_ore"
+    "": {
+      "model": "magicstorage:block/hellstone_ore"
     }
   }
 }

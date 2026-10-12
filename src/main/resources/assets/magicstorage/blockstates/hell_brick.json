@@ -1,7 +1,7 @@
 {
   "variants": {
-    "normal": {
-      "model": "magicstorage:hell_brick"
+    "": {
+      "model": "magicstorage:block/hell_brick"
     }
   }
 }

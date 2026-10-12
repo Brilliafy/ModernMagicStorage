@@ -16,7 +16,7 @@
       "item": "magicstorage:bar_luminite"
     },
     "P": {
-      "item": "magicstorage:portable_crafting_access"
+      "item": "magicstorage:portable_crafting_access_hm"
     },
     "E": {
       "item": "minecraft:end_crystal"
@@ -26,8 +26,7 @@
     }
   },
   "result": {
-    "item": "magicstorage:portable_crafting_access",
-    "data": 2,
+    "item": "magicstorage:portable_crafting_access_ultimate",
     "count": 1
   }
 }

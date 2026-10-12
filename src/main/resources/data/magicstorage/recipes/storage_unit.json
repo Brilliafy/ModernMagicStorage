@@ -17,8 +17,7 @@
     }
   },
   "result": {
-    "item": "magicstorage:storage_unit",
-    "data": 0,
+    "item": "magicstorage:storage_unit_basic",
     "count": 1
   }
 }

@@ -10,12 +10,11 @@
       "item": "magicstorage:upgrade_hellstone"
     },
     "S": {
-      "item": "magicstorage:storage_unit"
+      "item": "magicstorage:storage_unit_basic"
     }
   },
   "result": {
-    "item": "magicstorage:storage_unit",
-    "data": 3,
+    "item": "magicstorage:storage_unit_hellstone",
     "count": 1
   }
 }

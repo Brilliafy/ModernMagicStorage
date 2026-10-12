@@ -26,8 +26,7 @@
     }
   },
   "result": {
-    "item": "magicstorage:portable_crafting_access",
-    "data": 0,
+    "item": "magicstorage:portable_crafting_access_prehm",
     "count": 1
   }
 }
