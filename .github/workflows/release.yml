@@ -1,9 +1,13 @@
 name: release
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    inputs:
+      publish_to_stores:
+        description: 'Publish to Modrinth & CurseForge'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -21,11 +25,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate tag matches version
+      - name: Validate version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
           read -r VERSION CHANNEL_TAG < <(python3 -c '
           import tomllib
 
@@ -41,19 +44,10 @@ jobs:
             exit 1
           fi
 
-          echo "Validating tag '$TAG' against version '$FULL_VERSION'..."
-          if [[ "$TAG" != "$FULL_VERSION" ]]; then
-            echo "::error::Tag '$TAG' does not match version '$FULL_VERSION' in stonecutter.properties.toml."
-
-            if gh release view "$GITHUB_REF_NAME" &>/dev/null; then
-              echo "Deleting GitHub release for $GITHUB_REF_NAME..."
-              gh release delete "$GITHUB_REF_NAME" -y
-            fi
-
-            git push origin ":refs/tags/$GITHUB_REF_NAME"
-            exit 1
-          fi
-          echo "✓ Tag matches version."
+          RELEASE_TAG="v${FULL_VERSION}"
+          echo "Release tag: $RELEASE_TAG"
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          echo "✓ Version validated: $FULL_VERSION"
 
       - name: Prepare git-cliff
         run: |
@@ -78,9 +72,10 @@ jobs:
       - name: Build and publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUB_GITHUB_ENABLE: ${{ vars.PUB_GITHUB_ENABLE }}
+          GITHUB_REF_NAME: ${{ env.RELEASE_TAG }}
+          PUB_GITHUB_ENABLE: ${{ vars.PUB_GITHUB_ENABLE || 'true' }}
           PUB_DRY_RUN: ${{ vars.PUB_DRY_RUN }}
-          PUB_MODS_ENABLE: ${{ vars.PUB_MODS_ENABLE }}
+          PUB_MODS_ENABLE: ${{ inputs.publish_to_stores }}
           PUB_MAVEN_ENABLE: ${{ vars.PUB_MAVEN_ENABLE }}
           PUB_MAVEN_CENTRAL_ENABLE: ${{ vars.PUB_MAVEN_CENTRAL_ENABLE }}
           PUB_MAVEN_CENTRAL_SNAPSHOTS: ${{ vars.PUB_MAVEN_CENTRAL_SNAPSHOTS }}

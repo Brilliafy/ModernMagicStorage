@@ -22,3 +22,33 @@ stonecutter parameters {
 	swaps["minecraft"] = "\"${current.version}\";"
 	constants["release"] = properties.get<String>("mod.id") != "modtemplate"
 }
+
+tasks.register<Copy>("collectDebugJars") {
+	group = "build"
+	description = "Collects all compiled mod jars into debug-jars/ for local testing without publishing"
+	from("versions") {
+		include("*/build/libs/*.jar")
+		exclude { it.file.name.contains("sources") || it.file.name.contains("javadoc") }
+		eachFile {
+			path = name
+		}
+	}
+	into(layout.projectDirectory.dir("debug-jars"))
+	includeEmptyDirs = false
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+	doLast {
+		logger.lifecycle("==================================================")
+		logger.lifecycle("All testing jars ready in: debug-jars/")
+		logger.lifecycle("You can copy these into your .minecraft/mods folder.")
+		logger.lifecycle("==================================================")
+	}
+}
+
+tasks.register("debugBuild") {
+	group = "build"
+	description = "Compiles all target versions and collects jars into debug-jars/ for local testing"
+	dependsOn(stonecutter.tasks.named("jar"))
+	finalizedBy("collectDebugJars")
+}
+
+
