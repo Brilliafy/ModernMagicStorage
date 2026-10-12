@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#minecraft:is_nether",
+  "features": "magicstorage:ore_hellstone",
+  "step": "underground_ores"
+}

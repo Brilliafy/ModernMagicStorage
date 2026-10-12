@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RTR",
+    "LSL",
+    "ENE"
+  ],
+  "key": {
+    "T": {
+      "item": "magicstorage:terra_singularity"
+    },
+    "R": {
+      "item": "magicstorage:radiant_jewel"
+    },
+    "L": {
+      "item": "magicstorage:bar_luminite"
+    },
+    "N": {
+      "item": "minecraft:nether_star"
+    },
+    "E": {
+      "item": "minecraft:end_crystal"
+    },
+    "S": {
+      "item": "magicstorage:storage_component"
+    }
+  },
+  "result": {
+    "item": "magicstorage:upgrade_terra",
+    "count": 1
+  }
+}

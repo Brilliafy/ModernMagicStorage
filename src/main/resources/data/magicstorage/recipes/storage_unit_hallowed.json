@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " U ",
+    " S ",
+    "   "
+  ],
+  "key": {
+    "U": {
+      "item": "magicstorage:upgrade_hallowed"
+    },
+    "S": {
+      "item": "magicstorage:storage_unit"
+    }
+  },
+  "result": {
+    "item": "magicstorage:storage_unit",
+    "data": 4,
+    "count": 1
+  }
+}

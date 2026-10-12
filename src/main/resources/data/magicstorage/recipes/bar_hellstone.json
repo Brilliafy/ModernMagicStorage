@@ -1,0 +1,24 @@
+{
+  "type": "magicstorage:heart_furnace",
+  "ingredients": [
+    {
+      "item": "magicstorage:fragment_hellstone"
+    },
+    {
+      "item": "magicstorage:fragment_hellstone"
+    },
+    {
+      "item": "magicstorage:fragment_hellstone"
+    },
+    {
+      "item": "minecraft:obsidian"
+    },
+    {
+      "item": "minecraft:blaze_powder"
+    }
+  ],
+  "result": {
+    "item": "magicstorage:bar_hellstone",
+    "count": 1
+  }
+}

@@ -1,0 +1,82 @@
+loomx.loom_version = "1.18-SNAPSHOT"
+
+[mod]
+id = "magicstorage"
+name = "Modern Magic Storage"
+group = "com.brilliafy.magicstorage"
+version = "2.0.0"
+channel_tag = ""
+description = "A Terraria-inspired storage network mod for Minecraft — modern multi-loader edition supporting Fabric, NeoForge, and Forge."
+authors = ["Brilliafy"]
+contributors = []
+inception_year = "2026"
+license.name = "MIT"
+license.url = "https://opensource.org/licenses/MIT"
+license.dist = "repo"
+environment = "client_and_server"
+sources_url = "https://github.com/Brilliafy/ModernMagicStorage"
+homepage_url = "https://github.com/Brilliafy/ModernMagicStorage"
+issues_url = "https://github.com/Brilliafy/ModernMagicStorage/issues"
+dev_jvm_args = [
+	"-XX:+IgnoreUnrecognizedVMOptions",
+	"-XX:+UseZGC",
+	"-XX:+HeapDumpOnOutOfMemoryError",
+	"-XX:HeapDumpPath=heapdump.hprof",
+	"-XX:+ShowCodeDetailsInExceptionMessages",
+	"-XX:+UseCompactObjectHeaders",
+	"-XX:+AlwaysPreTouch",
+	"-XX:+UseStringDeduplication",
+	"-Dfile.encoding=UTF-8"
+]
+dev_jvm_args_mixin_debug = [
+	"-Dmixin.env.remapRefMap=true",
+	"-Dmixin.debug.verbose=true",
+	"-Dmixin.debug.verify=true",
+	"-Dmixin.debug.countInjections=true",
+	"-Dmixin.debug=true",
+	"-Dmixin.debug.export=true"
+]
+
+[[mod.pom.developers]]
+id = "brilliafy"
+name = "Brilliafy"
+url = "https://github.com/Brilliafy"
+
+[fabric]
+deps.fabric-loader = "0.16.10"
+
+[fabric."1.20.1"]
+deps.minecraft = "1.20.1"
+deps.fabric-api = "0.92.2+1.20.1"
+deps.modmenu = "7.2.2"
+deps.parchment = "1.20.1:2023.09.03"
+
+[fabric."1.21.1"]
+deps.minecraft = "1.21.1"
+deps.fabric-api = "0.116.7+1.21.1"
+deps.modmenu = "11.0.4"
+deps.parchment = "1.21.1:2024.11.17"
+
+[fabric."26.3"]
+deps.minecraft = "26.3"
+deps.fabric-loader = "0.19.5"
+deps.fabric-api = "0.160.6+26.3"
+deps.modmenu = "20.0.2"
+
+[forge]
+
+[forge."1.20.1"]
+deps.minecraft = "1.20.1"
+deps.forge = "47.4.0"
+deps.parchment = "1.20.1:2023.09.03"
+
+[neoforge]
+
+[neoforge."1.21.1"]
+deps.minecraft = "1.21.1"
+deps.neoforge = "21.1.213"
+deps.parchment = "1.21.1:2024.11.17"
+
+[neoforge."26.3"]
+deps.minecraft = "26.3"
+deps.neoforge = "26.3.0.1-beta"
