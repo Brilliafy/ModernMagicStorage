@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DKD",
+    "DSD",
+    "LLL"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "K": {
+      "item": "minecraft:clock"
+    },
+    "S": {
+      "item": "magicstorage:storage_component"
+    },
+    "L": {
+      "item": "minecraft:lapis_block"
+    }
+  },
+  "result": {
+    "item": "magicstorage:crafting_access",
+    "count": 1
+  }
+}

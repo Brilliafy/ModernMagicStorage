@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CLC",
+    "PSP",
+    "CLC"
+  ],
+  "key": {
+    "C": {
+      "item": "magicstorage:bar_chlorophyte"
+    },
+    "L": {
+      "item": "minecraft:lapis_block"
+    },
+    "P": {
+      "item": "minecraft:sea_lantern"
+    },
+    "S": {
+      "item": "magicstorage:storage_component"
+    }
+  },
+  "result": {
+    "item": "magicstorage:upgrade_blue_chlorophyte",
+    "count": 1
+  }
+}

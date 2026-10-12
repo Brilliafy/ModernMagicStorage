@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ILI",
+    "LCL",
+    "ILI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:chest"
+    },
+    "L": {
+      "tag": "c:chests/wooden"
+    },
+    "C": {
+      "item": "magicstorage:storage_component"
+    }
+  },
+  "result": {
+    "item": "magicstorage:storage_unit",
+    "data": 0,
+    "count": 1
+  }
+}

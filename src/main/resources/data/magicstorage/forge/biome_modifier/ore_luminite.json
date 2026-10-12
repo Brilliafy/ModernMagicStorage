@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#minecraft:is_end",
+  "features": "magicstorage:ore_luminite",
+  "step": "underground_ores"
+}

@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LRL",
+    "LSL",
+    "LKL"
+  ],
+  "key": {
+    "L": {
+      "item": "magicstorage:bar_luminite"
+    },
+    "R": {
+      "item": "magicstorage:radiant_jewel"
+    },
+    "K": {
+      "item": "minecraft:shulker_shell"
+    },
+    "S": {
+      "item": "magicstorage:storage_component"
+    }
+  },
+  "result": {
+    "item": "magicstorage:upgrade_luminite",
+    "count": 1
+  }
+}

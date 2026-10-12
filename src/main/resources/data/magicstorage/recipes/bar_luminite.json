@@ -1,0 +1,21 @@
+{
+  "type": "magicstorage:heart_furnace",
+  "ingredients": [
+    {
+      "item": "magicstorage:fragment_luminite"
+    },
+    {
+      "item": "magicstorage:fragment_luminite"
+    },
+    {
+      "item": "magicstorage:fragment_luminite"
+    },
+    {
+      "item": "magicstorage:fragment_luminite"
+    }
+  ],
+  "result": {
+    "item": "magicstorage:bar_luminite",
+    "count": 1
+  }
+}

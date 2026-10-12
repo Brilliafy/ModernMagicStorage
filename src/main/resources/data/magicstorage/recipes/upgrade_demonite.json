@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DID",
+    "OSO",
+    "DID"
+  ],
+  "key": {
+    "D": {
+      "item": "magicstorage:ingot_demonite"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "S": {
+      "item": "magicstorage:storage_component"
+    }
+  },
+  "result": {
+    "item": "magicstorage:upgrade_demonite",
+    "count": 1
+  }
+}
