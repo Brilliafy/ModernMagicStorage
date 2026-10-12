@@ -2,6 +2,7 @@ package com.brilliafy.magicstorage.block;
 
 import com.brilliafy.magicstorage.Constants;
 import com.brilliafy.magicstorage.blockentity.CraftingAccessBlockEntity;
+import com.brilliafy.magicstorage.storage.NetworkLocator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -39,6 +40,28 @@ public class BlockCraftingAccess extends BaseEntityBlock {
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new CraftingAccessBlockEntity(pos, state);
     }
+
+    @Override
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+        super.onPlace(state, level, pos, oldState, isMoving);
+        NetworkLocator.markNetworkDirty(level, pos);
+    }
+
+    //? >= 26.1 {
+    /*@Override
+    protected void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+        NetworkLocator.markNetworkDirty(level, pos);
+    }
+    *///?} < 26.1 {
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            NetworkLocator.markNetworkDirty(level, pos);
+        }
+        super.onRemove(state, level, pos, newState, isMoving);
+    }
+    //?}
 
     //? > 1.20.1 {
     @Override

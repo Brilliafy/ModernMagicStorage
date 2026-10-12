@@ -26,14 +26,14 @@ Modern Magic Storage is built on **Jared's MultiLoader-Template** architecture, 
 
 - **Storage Heart**: Central network brain. Emits Light Level 15 and holds 20 crafting station items.
 - **8 Storage Unit Tiers**:
-  1. **Basic**: 40 slots
-  2. **Crimtane**: 80 slots
-  3. **Demonite**: 80 slots
-  4. **Hellstone**: 120 slots
-  5. **Hallowed**: 160 slots
-  6. **Blue Chlorophyte**: 220 slots
-  7. **Luminite**: 300 slots
-  8. **Terra**: 600 slots
+  1. **Basic**: 36 slots
+  2. **Crimtane**: 54 slots
+  3. **Demonite**: 54 slots
+  4. **Hellstone**: 90 slots
+  5. **Hallowed**: 135 slots
+  6. **Blue Chlorophyte**: 180 slots
+  7. **Luminite**: 252 slots
+  8. **Terra**: 360 slots
 - **In-Place Upgrades**: Shift-right-click an existing storage unit with an upgrade item to expand its capacity without dropping stored items.
 - **Unified Terminals**:
   - **Storage Access**: Search, sort, deposit, and extract network items.

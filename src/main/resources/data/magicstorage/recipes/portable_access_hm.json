@@ -16,7 +16,7 @@
       "item": "minecraft:chorus_fruit_popped"
     },
     "P": {
-      "item": "magicstorage:portable_access"
+      "item": "magicstorage:portable_access_prehm"
     },
     "D": {
       "item": "minecraft:diamond_block"
@@ -26,8 +26,7 @@
     }
   },
   "result": {
-    "item": "magicstorage:portable_access",
-    "data": 1,
+    "item": "magicstorage:portable_access_hm",
     "count": 1
   }
 }

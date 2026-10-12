@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magicstorage:block/storage_unit_terra"
+    }
+  }
+}

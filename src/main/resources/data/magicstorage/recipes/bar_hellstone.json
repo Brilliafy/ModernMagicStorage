@@ -1,5 +1,5 @@
 {
-  "type": "magicstorage:heart_furnace",
+  "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
       "item": "magicstorage:fragment_hellstone"

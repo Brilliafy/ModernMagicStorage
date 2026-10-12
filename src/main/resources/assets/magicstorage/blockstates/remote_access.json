@@ -1,7 +1,7 @@
 {
   "variants": {
-    "normal": {
-      "model": "magicstorage:remote_access"
+    "": {
+      "model": "magicstorage:block/remote_access"
     }
   }
 }

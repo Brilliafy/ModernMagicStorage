@@ -1,7 +1,7 @@
 {
   "variants": {
-    "normal": {
-      "model": "magicstorage:storage_heart"
+    "": {
+      "model": "magicstorage:block/storage_heart"
     }
   }
 }

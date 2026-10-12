@@ -18,6 +18,28 @@ import java.util.Set;
 
 public class NetworkLocator {
 
+    /**
+     * Marks every Storage Heart reachable from the given position (and its immediate
+     * neighbours) as needing a network rescan. Called when a network block is placed
+     * or removed so that newly added/removed units are picked up without a reload.
+     */
+    public static void markNetworkDirty(Level level, BlockPos pos) {
+        if (level == null || level.isClientSide()) return;
+
+        Set<StorageHeartBlockEntity> hearts = new HashSet<>();
+        for (Direction dir : Direction.values()) {
+            BlockPos neighbor = pos.relative(dir);
+            BlockEntity be = level.getBlockEntity(neighbor);
+            if (be instanceof StorageHeartBlockEntity heart) {
+                hearts.add(heart);
+            } else {
+                StorageHeartBlockEntity found = findConnectedHeart(level, neighbor);
+                if (found != null) hearts.add(found);
+            }
+        }
+        hearts.forEach(StorageHeartBlockEntity::markNetworkDirty);
+    }
+
     public static StorageHeartBlockEntity findConnectedHeart(Level level, BlockPos startPos) {
         if (level == null) return null;
 
