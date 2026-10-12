@@ -27,7 +27,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
     }
 
     public CraftingAccessMenu(int containerId, Inventory playerInventory, StorageHeartBlockEntity heart) {
-        super(ModMenus.CRAFTING_ACCESS, containerId, playerInventory, heart);
+        super(ModMenus.CRAFTING_ACCESS, containerId, playerInventory, heart, 3, 8, 80);
         this.level = playerInventory.player.level();
 
         // Crafting result slot at index 0 of special slots
@@ -55,6 +55,35 @@ public class CraftingAccessMenu extends StorageAccessMenu {
     public ResultContainer getResultSlots() {
         return resultSlots;
     }
+
+    /** Slot index of the crafting result. */
+    public int getResultSlotIndex() {
+        return getPlayerSlotStart() + 36;
+    }
+
+    //? >= 26.1 {
+    /*@Override
+    public void clicked(int slotId, int button, net.minecraft.world.inventory.ContainerInput type, Player player) {
+        if (slotId == getResultSlotIndex() && type == net.minecraft.world.inventory.ContainerInput.QUICK_MOVE) {
+            if (!level.isClientSide()) {
+                instantCraftAll(player);
+            }
+            return;
+        }
+        super.clicked(slotId, button, type, player);
+    }
+    *///?} < 26.1 {
+    @Override
+    public void clicked(int slotId, int button, ClickType type, Player player) {
+        if (slotId == getResultSlotIndex() && type == ClickType.QUICK_MOVE) {
+            if (!level.isClientSide()) {
+                instantCraftAll(player);
+            }
+            return;
+        }
+        super.clicked(slotId, button, type, player);
+    }
+    //?}
 
     @Override
     public void slotsChanged(Container container) {
