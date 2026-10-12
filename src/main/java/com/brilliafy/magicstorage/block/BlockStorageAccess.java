@@ -1,5 +1,6 @@
 package com.brilliafy.magicstorage.block;
 
+import com.brilliafy.magicstorage.Constants;
 import com.brilliafy.magicstorage.blockentity.StorageAccessBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockStorageAccess extends BaseEntityBlock {
 
-    //? > 1.20.1 {
+    //? > 1.20.1 && < 26.1 {
     public static final com.mojang.serialization.MapCodec<BlockStorageAccess> CODEC = simpleCodec(BlockStorageAccess::new);
 
     @Override
@@ -42,24 +43,24 @@ public class BlockStorageAccess extends BaseEntityBlock {
     //? > 1.20.1 {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof StorageAccessBlockEntity access) {
                 player.openMenu(access);
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return Constants.success(level);
     }
     //?} <= 1.20.1 {
     /*@Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof StorageAccessBlockEntity access) {
-                access.openNetworkMenu(player);
+                player.openMenu(access);
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return Constants.success(level);
     }
     *///?}
 }

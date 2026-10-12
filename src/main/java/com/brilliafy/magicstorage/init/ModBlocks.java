@@ -62,11 +62,7 @@ public class ModBlocks {
             7, 360, BlockBehaviour.Properties.of().strength(6.0f, 12.0f).sound(SoundType.METAL)));
 
     private static <T extends Block> T register(String name, T block) {
-        //? > 1.19.2 {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
-        //?} <= 1.19.2 {
-        /*ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        *///?}
+        ResourceLocation id = Constants.id(name);
         BLOCKS.put(id, block);
         return block;
     }

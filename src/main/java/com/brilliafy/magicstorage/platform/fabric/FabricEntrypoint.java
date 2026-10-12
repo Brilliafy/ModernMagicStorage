@@ -17,13 +17,8 @@ public class FabricEntrypoint implements ModInitializer {
     public void onInitialize() {
         ModernMagicStorage.onInitialize();
 
-        //? > 1.19.2 {
-        ResourceLocation hellstoneId = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "ore_hellstone");
-        ResourceLocation luminiteId = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "ore_luminite");
-        //?} <= 1.19.2 {
-        /*ResourceLocation hellstoneId = new ResourceLocation(Constants.MOD_ID, "ore_hellstone");
-        ResourceLocation luminiteId = new ResourceLocation(Constants.MOD_ID, "ore_luminite");
-        *///?}
+        ResourceLocation hellstoneId = Constants.id("ore_hellstone");
+        ResourceLocation luminiteId = Constants.id("ore_luminite");
 
         BiomeModifications.addFeature(
                 BiomeSelectors.foundInTheNether(),

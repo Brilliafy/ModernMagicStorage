@@ -16,12 +16,12 @@ public class ModBlockEntities {
 
     public static final BlockEntityType<StorageHeartBlockEntity> STORAGE_HEART = register(
             "storage_heart",
-            BlockEntityType.Builder.of(StorageHeartBlockEntity::new, ModBlocks.STORAGE_HEART).build(null)
+            createType(StorageHeartBlockEntity::new, ModBlocks.STORAGE_HEART)
     );
 
     public static final BlockEntityType<StorageUnitBlockEntity> STORAGE_UNIT = register(
             "storage_unit",
-            BlockEntityType.Builder.of(
+            createType(
                     StorageUnitBlockEntity::new,
                     ModBlocks.STORAGE_UNIT_BASIC,
                     ModBlocks.STORAGE_UNIT_CRIMTANE,
@@ -31,30 +31,35 @@ public class ModBlockEntities {
                     ModBlocks.STORAGE_UNIT_BLUE_CHLOROPHYTE,
                     ModBlocks.STORAGE_UNIT_LUMINITE,
                     ModBlocks.STORAGE_UNIT_TERRA
-            ).build(null)
+            )
     );
 
     public static final BlockEntityType<StorageAccessBlockEntity> STORAGE_ACCESS = register(
             "storage_access",
-            BlockEntityType.Builder.of(StorageAccessBlockEntity::new, ModBlocks.STORAGE_ACCESS).build(null)
+            createType(StorageAccessBlockEntity::new, ModBlocks.STORAGE_ACCESS)
     );
 
     public static final BlockEntityType<CraftingAccessBlockEntity> CRAFTING_ACCESS = register(
             "crafting_access",
-            BlockEntityType.Builder.of(CraftingAccessBlockEntity::new, ModBlocks.CRAFTING_ACCESS).build(null)
+            createType(CraftingAccessBlockEntity::new, ModBlocks.CRAFTING_ACCESS)
     );
 
     public static final BlockEntityType<RemoteAccessBlockEntity> REMOTE_ACCESS = register(
             "remote_access",
-            BlockEntityType.Builder.of(RemoteAccessBlockEntity::new, ModBlocks.REMOTE_ACCESS).build(null)
+            createType(RemoteAccessBlockEntity::new, ModBlocks.REMOTE_ACCESS)
     );
 
+    private static <T extends net.minecraft.world.level.block.entity.BlockEntity> BlockEntityType<T> createType(
+            BlockEntityType.BlockEntitySupplier<T> supplier, Block... blocks) {
+        //? >= 26.1 {
+        /*return new BlockEntityType<>(supplier, java.util.Set.of(blocks));
+        *///?} < 26.1 {
+        return BlockEntityType.Builder.of(supplier, blocks).build(null);
+        //?}
+    }
+
     private static <T extends BlockEntityType<?>> T register(String name, T type) {
-        //? > 1.19.2 {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
-        //?} <= 1.19.2 {
-        /*ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        *///?}
+        ResourceLocation id = Constants.id(name);
         BLOCK_ENTITY_TYPES.put(id, type);
         return type;
     }

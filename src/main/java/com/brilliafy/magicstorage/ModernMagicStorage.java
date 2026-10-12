@@ -6,9 +6,9 @@ import com.brilliafy.magicstorage.init.ModCreativeTabs;
 import com.brilliafy.magicstorage.init.ModItems;
 import com.brilliafy.magicstorage.init.ModMenus;
 import com.brilliafy.magicstorage.platform.Platform;
+//? fabric {
 import com.brilliafy.magicstorage.platform.fabric.FabricPlatform;
-
-//? neoforge {
+//?} neoforge {
 /*import com.brilliafy.magicstorage.platform.neoforge.NeoforgePlatform;
 *///?} forge {
 /*import com.brilliafy.magicstorage.platform.forge.ForgePlatform;
@@ -29,7 +29,9 @@ public class ModernMagicStorage {
 
     public static void onInitializeClient() {
         Constants.LOGGER.info("Initializing {} Client", Constants.MOD_NAME);
+        //? fabric {
         com.brilliafy.magicstorage.client.ModScreens.registerScreens();
+        //?}
     }
 
     public static Platform xplat() {

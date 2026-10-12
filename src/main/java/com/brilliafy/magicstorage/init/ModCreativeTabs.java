@@ -9,11 +9,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 
 public class ModCreativeTabs {
-    //? > 1.19.2 {
-    public static final ResourceLocation TAB_ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "main");
-    //?} <= 1.19.2 {
-    /*public static final ResourceLocation TAB_ID = new ResourceLocation(Constants.MOD_ID, "main");
-    *///?}
+    public static final ResourceLocation TAB_ID = Constants.id("main");
 
     public static final CreativeModeTab TAB = CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
             .title(Component.translatable("itemGroup.magicstorage"))

@@ -13,7 +13,6 @@ import java.util.Map;
 public class ModMenus {
     public static final Map<ResourceLocation, MenuType<?>> MENU_TYPES = new LinkedHashMap<>();
 
-    //? > 1.20.1 {
     public static final MenuType<StorageAccessMenu> STORAGE_ACCESS = register(
             "storage_access",
             new MenuType<>(StorageAccessMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS)
@@ -28,29 +27,9 @@ public class ModMenus {
             "storage_unit",
             new MenuType<>(StorageUnitMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS)
     );
-    //?} <= 1.20.1 {
-    /*public static final MenuType<StorageAccessMenu> STORAGE_ACCESS = register(
-            "storage_access",
-            new MenuType<>(StorageAccessMenu::new)
-    );
-
-    public static final MenuType<CraftingAccessMenu> CRAFTING_ACCESS = register(
-            "crafting_access",
-            new MenuType<>(CraftingAccessMenu::new)
-    );
-
-    public static final MenuType<StorageUnitMenu> STORAGE_UNIT = register(
-            "storage_unit",
-            new MenuType<>(StorageUnitMenu::new)
-    );
-    *///?}
 
     private static <T extends MenuType<?>> T register(String name, T type) {
-        //? > 1.19.2 {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
-        //?} <= 1.19.2 {
-        /*ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        *///?}
+        ResourceLocation id = Constants.id(name);
         MENU_TYPES.put(id, type);
         return type;
     }

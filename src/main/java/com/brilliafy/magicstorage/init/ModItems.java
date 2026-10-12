@@ -57,11 +57,7 @@ public class ModItems {
     }
 
     private static <T extends Item> T register(String name, T item) {
-        //? > 1.19.2 {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
-        //?} <= 1.19.2 {
-        /*ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        *///?}
+        ResourceLocation id = Constants.id(name);
         ITEMS.put(id, item);
         return item;
     }
