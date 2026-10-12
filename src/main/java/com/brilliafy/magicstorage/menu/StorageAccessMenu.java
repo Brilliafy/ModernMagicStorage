@@ -110,19 +110,19 @@ public class StorageAccessMenu extends AbstractContainerMenu {
 
     public void depositAll() {
         if (heart == null) return;
-        for (int i = 0; i < playerInventory.items.size(); i++) {
-            ItemStack stack = playerInventory.items.get(i);
+        for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+            ItemStack stack = playerInventory.getItem(i);
             if (!stack.isEmpty()) {
                 ItemStack remainder = heart.insertItem(stack);
-                playerInventory.items.set(i, remainder);
+                playerInventory.setItem(i, remainder);
             }
         }
     }
 
     public void restock() {
         if (heart == null) return;
-        for (int i = 0; i < playerInventory.items.size(); i++) {
-            ItemStack stack = playerInventory.items.get(i);
+        for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+            ItemStack stack = playerInventory.getItem(i);
             if (!stack.isEmpty() && stack.getCount() < stack.getMaxStackSize()) {
                 int needed = stack.getMaxStackSize() - stack.getCount();
                 ItemStack extracted = heart.extractItem(stack, needed);

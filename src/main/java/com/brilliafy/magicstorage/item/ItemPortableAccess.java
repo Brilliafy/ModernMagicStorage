@@ -7,7 +7,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+//? < 26.1 {
 import net.minecraft.world.InteractionResultHolder;
+//?}
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -42,35 +44,50 @@ public class ItemPortableAccess extends Item {
 
         if (player != null && player.isShiftKeyDown()) {
             if (level.getBlockState(pos).getBlock() instanceof BlockRemoteAccess) {
-                if (!level.isClientSide) {
+                if (!level.isClientSide()) {
                     BlockEntity be = level.getBlockEntity(pos);
                     if (be instanceof RemoteAccessBlockEntity remote) {
                         BlockPos heartPos = remote.getHeartPos();
                         if (heartPos != null) {
                             bindToNetwork(stack, heartPos, level.dimension().location().toString());
-                            player.displayClientMessage(Component.translatable("gui.magicstorage.remote_bound"), true);
+                            com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound"), true);
                             return InteractionResult.SUCCESS;
                         }
                     }
                 }
-                return InteractionResult.sidedSuccess(level.isClientSide);
+                return InteractionResult.SUCCESS;
             }
         }
         return super.useOn(context);
     }
 
+    //? >= 26.1 {
+    /*@Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!level.isClientSide()) {
+            StorageHeartBlockEntity heart = getBoundHeart(level, stack, player);
+            if (heart != null) {
+                heart.openNetworkAccess(player);
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return InteractionResult.SUCCESS;
+    }
+    *///?} < 26.1 {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             StorageHeartBlockEntity heart = getBoundHeart(level, stack, player);
             if (heart != null) {
                 heart.openNetworkAccess(player);
                 return InteractionResultHolder.success(stack);
             }
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
+    //?}
 
     public void bindToNetwork(ItemStack stack, BlockPos heartPos, String dimension) {
         com.brilliafy.magicstorage.util.ItemHelper.bindRemote(stack, heartPos, dimension);
@@ -79,19 +96,23 @@ public class ItemPortableAccess extends Item {
     public StorageHeartBlockEntity getBoundHeart(Level level, ItemStack stack, Player player) {
         var tag = com.brilliafy.magicstorage.util.ItemHelper.getRemoteTag(stack);
         if (tag == null || !tag.contains("HeartX")) {
-            player.displayClientMessage(Component.translatable("gui.magicstorage.remote_not_bound"), true);
+            com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_not_bound"), true);
             return null;
         }
 
-        String dim = tag.getString("HeartDim");
+        String dim = com.brilliafy.magicstorage.util.ItemHelper.getString(tag, "HeartDim");
         if (!crossDimensional && !dim.equals(level.dimension().location().toString())) {
-            player.displayClientMessage(Component.translatable("gui.magicstorage.remote_wrong_dimension"), true);
+            com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_wrong_dimension"), true);
             return null;
         }
 
-        BlockPos pos = new BlockPos(tag.getInt("HeartX"), tag.getInt("HeartY"), tag.getInt("HeartZ"));
+        BlockPos pos = new BlockPos(
+                com.brilliafy.magicstorage.util.ItemHelper.getInt(tag, "HeartX"),
+                com.brilliafy.magicstorage.util.ItemHelper.getInt(tag, "HeartY"),
+                com.brilliafy.magicstorage.util.ItemHelper.getInt(tag, "HeartZ")
+        );
         if (maxRange > 0 && Math.sqrt(player.blockPosition().distSqr(pos)) > maxRange) {
-            player.displayClientMessage(Component.translatable("gui.magicstorage.remote_out_of_range"), true);
+            com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_out_of_range"), true);
             return null;
         }
 
@@ -99,7 +120,7 @@ public class ItemPortableAccess extends Item {
         if (be instanceof StorageHeartBlockEntity heart) {
             return heart;
         }
-        player.displayClientMessage(Component.translatable("gui.magicstorage.remote_heart_missing"), true);
+        com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_heart_missing"), true);
         return null;
     }
 }

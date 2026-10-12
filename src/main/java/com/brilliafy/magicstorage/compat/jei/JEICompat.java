@@ -51,8 +51,8 @@ public class JEICompat {
                         if (!filled.isEmpty()) break;
                     }
                     // Try to pull 1 from player inventory
-                    for (int p = 0; p < player.getInventory().items.size(); p++) {
-                        ItemStack pStack = player.getInventory().items.get(p);
+                    for (int p = 0; p < player.getInventory().getContainerSize(); p++) {
+                        ItemStack pStack = player.getInventory().getItem(p);
                         if (com.brilliafy.magicstorage.util.ItemHelper.canMerge(pStack, candidate)) {
                             filled = pStack.split(1);
                             break;

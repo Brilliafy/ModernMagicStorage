@@ -1,1 +1,7 @@
+//? fabric {
 com.brilliafy.magicstorage.platform.fabric.FabricPlatform
+//?} neoforge {
+/*com.brilliafy.magicstorage.platform.neoforge.NeoforgePlatform
+*///?} forge {
+/*com.brilliafy.magicstorage.platform.forge.ForgePlatform
+*///?}

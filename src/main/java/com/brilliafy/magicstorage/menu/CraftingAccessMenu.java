@@ -58,13 +58,22 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
     @Override
     public void slotsChanged(Container container) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             updateCraftingResult();
         }
     }
 
     protected void updateCraftingResult() {
-        //? > 1.20.1 {
+        //? >= 26.1 {
+        /*CraftingInput input = craftSlots.asCraftInput();
+        Optional<RecipeHolder<CraftingRecipe>> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
+        if (match.isPresent()) {
+            ItemStack result = match.get().value().assemble(input);
+            resultSlots.setItem(0, result);
+        } else {
+            resultSlots.setItem(0, ItemStack.EMPTY);
+        }
+        *///?} < 26.1 && > 1.20.1 {
         CraftingInput input = craftSlots.asCraftInput();
         Optional<RecipeHolder<CraftingRecipe>> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
         if (match.isPresent()) {
@@ -88,7 +97,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
      * Instant craft-all when player shift-clicks the crafting result slot.
      */
     public void instantCraftAll(Player player) {
-        if (level.isClientSide || resultSlots.getItem(0).isEmpty()) return;
+        if (level.isClientSide() || resultSlots.getItem(0).isEmpty()) return;
 
         // Calculate how many crafts are possible
         int maxCrafts = Integer.MAX_VALUE;
@@ -143,7 +152,13 @@ public class CraftingAccessMenu extends StorageAccessMenu {
                 if (heart != null) {
                     heart.insertItem(totalCrafted);
                 } else {
+                    //? >= 26.1 {
+                    /*if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                        player.spawnAtLocation(serverLevel, totalCrafted);
+                    }
+                    *///?} < 26.1 {
                     player.drop(totalCrafted, false);
+                    //?}
                 }
             }
         }

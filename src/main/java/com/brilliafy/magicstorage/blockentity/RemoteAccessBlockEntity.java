@@ -35,7 +35,25 @@ public class RemoteAccessBlockEntity extends BlockEntity {
         setChanged();
     }
 
-    //? > 1.20.1 {
+    //? >= 26.1 {
+    /*@Override
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        if (boundHeartPos != null) {
+            output.putInt("HeartX", boundHeartPos.getX());
+            output.putInt("HeartY", boundHeartPos.getY());
+            output.putInt("HeartZ", boundHeartPos.getZ());
+        }
+    }
+
+    @Override
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        if (input.getInt("HeartX").isPresent()) {
+            boundHeartPos = new BlockPos(input.getIntOr("HeartX", 0), input.getIntOr("HeartY", 0), input.getIntOr("HeartZ", 0));
+        }
+    }
+    *///?} < 26.1 && > 1.20.1 {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);

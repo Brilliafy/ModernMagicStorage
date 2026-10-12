@@ -45,7 +45,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, StorageHeartBlockEntity be) {
-        if (!level.isClientSide && be.networkDirty) {
+        if (!level.isClientSide() && be.networkDirty) {
             be.refreshNetwork();
         }
     }
@@ -55,7 +55,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
     }
 
     public void refreshNetwork() {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
 
         connectedUnits.clear();
         connectedAccesses.clear();
@@ -149,7 +149,21 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         ));
     }
 
-    //? > 1.20.1 {
+    //? >= 26.1 {
+    /*@Override
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        ContainerHelper.saveAllItems(output, stationInventory);
+    }
+
+    @Override
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        ContainerHelper.loadAllItems(input, stationInventory);
+        stationManager.updateStations(stationInventory);
+        this.networkDirty = true;
+    }
+    *///?} < 26.1 && > 1.20.1 {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);

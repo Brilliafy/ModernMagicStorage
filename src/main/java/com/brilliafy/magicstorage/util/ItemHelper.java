@@ -48,4 +48,32 @@ public class ItemHelper {
         /*return stack.getTag();
         *///?}
     }
+
+    public static String getString(CompoundTag tag, String key) {
+        //? >= 26.1 {
+        /*return tag.getStringOr(key, "");
+        *///?} < 26.1 {
+        return tag.getString(key);
+        //?}
+    }
+
+    public static int getInt(CompoundTag tag, String key) {
+        //? >= 26.1 {
+        /*return tag.getIntOr(key, 0);
+        *///?} < 26.1 {
+        return tag.getInt(key);
+        //?}
+    }
+
+    public static void displayClientMessage(net.minecraft.world.entity.player.Player player, net.minecraft.network.chat.Component component, boolean overlay) {
+        //? >= 26.1 {
+        /*if (overlay) {
+            player.sendOverlayMessage(component);
+        } else {
+            player.sendSystemMessage(component);
+        }
+        *///?} < 26.1 {
+        player.displayClientMessage(component, overlay);
+        //?}
+    }
 }

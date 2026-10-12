@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockRemoteAccess extends BaseEntityBlock {
 
-    //? > 1.20.1 {
+    //? > 1.20.1 && < 26.1 {
     public static final com.mojang.serialization.MapCodec<BlockRemoteAccess> CODEC = simpleCodec(BlockRemoteAccess::new);
 
     @Override

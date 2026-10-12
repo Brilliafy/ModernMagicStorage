@@ -127,7 +127,23 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
         return result;
     }
 
-    //? > 1.20.1 {
+    //? >= 26.1 {
+    /*@Override
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        output.putInt("Capacity", capacity);
+        ContainerHelper.saveAllItems(output, items);
+    }
+
+    @Override
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        int cap = input.getIntOr("Capacity", 0);
+        if (cap > 0) this.capacity = cap;
+        this.items = NonNullList.withSize(this.capacity, ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(input, items);
+    }
+    *///?} < 26.1 && > 1.20.1 {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);

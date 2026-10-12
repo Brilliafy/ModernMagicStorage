@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 public class BlockStorageUnit extends BaseEntityBlock {
     public static final int[] TIER_SLOT_COUNTS = {36, 54, 54, 90, 135, 180, 252, 360};
 
-    //? > 1.20.1 {
+    //? > 1.20.1 && < 26.1 {
     public static final com.mojang.serialization.MapCodec<BlockStorageUnit> CODEC = simpleCodec(props -> new BlockStorageUnit(0, 36, props));
 
     @Override
@@ -57,7 +57,38 @@ public class BlockStorageUnit extends BaseEntityBlock {
         return new StorageUnitBlockEntity(pos, state, capacity);
     }
 
-    //? > 1.20.1 {
+    //? >= 26.1 {
+    /*@Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (stack.getItem() instanceof ItemStorageUpgrade upgrade) {
+            if (upgrade.getTargetTier() > this.tier) {
+                if (!level.isClientSide()) {
+                    BlockEntity be = level.getBlockEntity(pos);
+                    if (be instanceof StorageUnitBlockEntity unit) {
+                        upgrade.applyUpgrade(level, pos, unit);
+                        if (!player.getAbilities().instabuild) {
+                            stack.shrink(1);
+                        }
+                        level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
+                    }
+                }
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return super.useItemOn(stack, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!level.isClientSide()) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof StorageUnitBlockEntity unit) {
+                player.openMenu(unit);
+            }
+        }
+        return InteractionResult.SUCCESS;
+    }
+    *///?} < 26.1 && > 1.20.1 {
     @Override
     protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (stack.getItem() instanceof ItemStorageUpgrade upgrade) {

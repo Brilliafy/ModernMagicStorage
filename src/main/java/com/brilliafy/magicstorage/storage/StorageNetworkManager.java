@@ -64,7 +64,11 @@ public class StorageNetworkManager {
                 }
             } else if (filter.startsWith("#")) {
                 String tag = filter.substring(1);
+                //? >= 26.1 {
+                /*boolean matches = stack.typeHolder().tags().anyMatch(t -> t.location ().toString().toLowerCase().contains(tag));
+                *///?} < 26.1 {
                 boolean matches = stack.getTags().anyMatch(t -> t.location().toString().toLowerCase().contains(tag));
+                //?}
                 if (matches) {
                     result.add(stack);
                 }
