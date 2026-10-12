@@ -27,6 +27,14 @@ platform {
 			fabricLikeVersionRange = ">=${prop("deps.fabric-loader")}"
 		}
 		optional("modmenu") {}
+		if (sc.current.parsed < "26") {
+			// Modern replacements / companions. All soft dependencies.
+			optional("jei") { slug("jei") }
+			optional("curios") { slug("curios") }
+			optional("apotheosis") { slug("apotheosis") }
+			optional("quality_equipment") { slug("quality-equipment", "quality-equipment") }
+			optional("reskillable") { slug("reskillable-reimagined", "reskillable-reimagined") }
+		}
 	}
 }
 
@@ -61,6 +69,7 @@ fabricApi {
 repositories {
 	mavenCentral()
 	maven("https://maven.parchmentmc.org") { name = "ParchmentMC" }
+	maven("https://maven.blamejared.com/") { name = "BlameJared" }
 	strictMaven("https://maven.terraformersmc.com/", "com.terraformersmc") { name = "TerraformersMC" }
 	strictMaven("https://api.modrinth.com/maven", "maven.modrinth") { name = "Modrinth" }
 }
@@ -89,4 +98,7 @@ dependencies {
 	annotationProcessor(libs.mixinextras.common)
 	implementation(libs.mixinextras.fabric)
 	include(libs.mixinextras.fabric)
+	if (sc.current.parsed < "26") {
+		modCompileOnly("mezz.jei:jei-${sc.current.version}-fabric:${if (sc.current.parsed >= "1.21") "19.64.0.453" else "15.62.0.219"}")
+	}
 }
