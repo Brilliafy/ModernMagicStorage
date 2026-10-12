@@ -31,14 +31,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         this.level = playerInventory.player.level();
 
         // Crafting result slot at index 0 of special slots
-        this.addSlot(new ResultSlot(playerInventory.player, craftSlots, resultSlots, 0, 124, 35) {
-            @Override
-            public void onTake(Player player, ItemStack stack) {
-                // If not shift-crafting, take 1 craft standard logic
-                super.onTake(player, stack);
-                slotsChanged(craftSlots);
-            }
-        });
+        this.addSlot(new MagicStorageResultSlot(this, playerInventory.player, craftSlots, resultSlots));
 
         // 3x3 Crafting grid
         for (int row = 0; row < 3; row++) {
@@ -50,6 +43,23 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
     public TransientCraftingContainer getCraftSlots() {
         return craftSlots;
+    }
+
+    /** Result slot that re-evaluates the recipe after a craft is taken. */
+    public static class MagicStorageResultSlot extends ResultSlot {
+        private final CraftingAccessMenu menu;
+
+        public MagicStorageResultSlot(CraftingAccessMenu menu, Player player,
+                                      TransientCraftingContainer craftSlots, ResultContainer resultSlots) {
+            super(player, craftSlots, resultSlots, 0, 124, 35);
+            this.menu = menu;
+        }
+
+        @Override
+        public void onTake(Player player, ItemStack stack) {
+            super.onTake(player, stack);
+            menu.slotsChanged(menu.getCraftSlots());
+        }
     }
 
     public ResultContainer getResultSlots() {

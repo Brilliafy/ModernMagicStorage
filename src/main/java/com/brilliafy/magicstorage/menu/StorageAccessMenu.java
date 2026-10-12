@@ -3,6 +3,7 @@ package com.brilliafy.magicstorage.menu;
 import com.brilliafy.magicstorage.blockentity.StorageHeartBlockEntity;
 import com.brilliafy.magicstorage.init.ModMenus;
 import com.brilliafy.magicstorage.storage.StorageNetworkManager;
+import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -72,24 +73,31 @@ public class StorageAccessMenu extends AbstractContainerMenu {
 
         for (int row = 0; row < displayRows; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(this.display, col + row * 9,
-                        displayX + col * 18, displayY + row * 18) {
-                    @Override
-                    public boolean mayPickup(Player player) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean mayPlace(ItemStack stack) {
-                        return false;
-                    }
-                });
+                this.addSlot(new ReadOnlySlot(this.display, col + row * 9,
+                        displayX + col * 18, displayY + row * 18));
             }
         }
 
         addPlayerInventorySlots(playerInventory);
         if (heart != null) {
             refreshDisplay();
+        }
+    }
+
+    /** Read-only slot used for the mirrored network view. */
+    public static class ReadOnlySlot extends Slot {
+        public ReadOnlySlot(Container container, int index, int x, int y) {
+            super(container, index, x, y);
+        }
+
+        @Override
+        public boolean mayPickup(Player player) {
+            return false;
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return false;
         }
     }
 
