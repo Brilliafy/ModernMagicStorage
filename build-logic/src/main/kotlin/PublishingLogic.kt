@@ -107,7 +107,7 @@ private fun ModPublishExtension.modrinth(
 	if (staging) apiEndpoint = "https://staging-api.modrinth.com/v2"
 
 	environment = ctx.environment
-	projectId = project.env("PUB_MODRINTH_PROJECT_ID")
+	projectId = project.env("PUB_MODRINTH_PROJECT_ID") ?: "3SFNKJXS"
 
 	this.accessToken = accessToken
 	minecraftVersions.addAll(listOf(ctx.currentMcVersion) + additionalVersions)
@@ -127,7 +127,7 @@ private fun ModPublishExtension.modrinth(
 private fun ModPublishExtension.curseforge(
 	ctx: Context, additionalVersions: List<String>, accessToken: String?
 ) = curseforge {
-	projectId = project.env("PUB_CURSEFORGE_PROJECT_ID")
+	projectId = project.env("PUB_CURSEFORGE_PROJECT_ID") ?: "1629983"
 
 	client = ctx.environmentPhysicalClient
 	server = ctx.environmentPhysicalServer
