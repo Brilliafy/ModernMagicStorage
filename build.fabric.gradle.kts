@@ -28,6 +28,7 @@ platform {
 		}
 		optional("modmenu") {}
 		optional("jei") { slug("jei") }
+		optional("fairexperience") { slug("fair-experience", "fair-experience") }
 		if (sc.current.parsed < "26") {
 			// Modern replacements / companions. All soft dependencies.
 			optional("curios") { slug("curios") }

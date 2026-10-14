@@ -20,6 +20,7 @@ platform {
 			forgeLikeVersionRange.set("[${prop("deps.neoforge")},)")
 		}
 		optional("jei") { slug("jei") }
+		optional("fairexperience") { slug("fair-experience", "fair-experience") }
 		if (sc.current.parsed < "26") {
 			optional("curios") { slug("curios") }
 			optional("apotheosis") { slug("apotheosis") }

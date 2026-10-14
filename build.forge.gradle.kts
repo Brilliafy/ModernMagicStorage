@@ -21,6 +21,7 @@ platform {
 		}
 		if (sc.current.parsed < "26") {
 			optional("jei") { slug("jei") }
+			optional("fairexperience") { slug("fair-experience", "fair-experience") }
 			optional("curios") { slug("curios") }
 			optional("apotheosis") { slug("apotheosis") }
 			optional("quality_equipment") { slug("quality-equipment", "quality-equipment") }

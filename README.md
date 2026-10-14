@@ -58,6 +58,7 @@ All third-party integrations are soft/optional dependencies. If a mod is not pre
 | **[Curios API](https://github.com/TheIllusiveC4/Curios)** | Modern replacement for Baubles. Recognizes accessory reforging anvils as valid Heart stations. |
 | **[Apotheosis](https://github.com/Shadows-of-Fire/Apotheosis)** | Modern replacement for Disenchanters. Supports **Tome of Scrapping** and **Tome of Extraction** in the station slots. |
 | **[JEI (Just Enough Items)](https://github.com/mezz/JustEnoughItems)** | Dynamic `+` recipe transfer into Crafting Access, automatically pulling ingredients from network storage and inventory. |
+| **[Fair Experience](https://github.com/Brilliafy/ModernFairExperience)** | Companion mod. Seamlessly calculates fair raw XP costs for anvil and enchanting station operations. |
 | **[Quality Equipment](https://www.curseforge.com/minecraft/mc-mods/quality-equipment)** | Supports reforging station detection. |
 | **[Reskillable Reimagined](https://www.curseforge.com/minecraft/mc-mods/reskillable-reimagined)** | Validates player skill requirements before allowing access to restricted gear. |
 
