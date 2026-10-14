@@ -25,6 +25,7 @@ import net.minecraft.core.HolderLookup;
 public class StorageUnitBlockEntity extends BlockEntity implements Container, MenuProvider {
     private int capacity;
     private NonNullList<ItemStack> items;
+    private boolean suppressDrop = false;
 
     public StorageUnitBlockEntity(BlockPos pos, BlockState state) {
         this(pos, state, state.getBlock() instanceof BlockStorageUnit u ? u.getCapacity() : 36);
@@ -34,6 +35,14 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
         super(ModBlockEntities.STORAGE_UNIT, pos, state);
         this.capacity = capacity > 0 ? capacity : 36;
         this.items = NonNullList.withSize(this.capacity, ItemStack.EMPTY);
+    }
+
+    public boolean isSuppressDrop() {
+        return suppressDrop;
+    }
+
+    public void setSuppressDrop(boolean suppressDrop) {
+        this.suppressDrop = suppressDrop;
     }
 
     public int getCapacity() {
@@ -59,6 +68,7 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
             for (int i = 0; i < Math.min(oldItems.size(), newCapacity); i++) {
                 this.items.set(i, oldItems.get(i).copy());
             }
+            oldUnit.clearContent();
         }
         setChanged();
     }
@@ -236,4 +246,12 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         return new StorageUnitMenu(containerId, playerInventory, this);
     }
+
+    //? >= 26.1 {
+    /*@Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (suppressDrop) return;
+        super.preRemoveSideEffects(pos, state);
+    }
+    *///?}
 }

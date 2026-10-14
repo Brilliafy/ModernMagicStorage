@@ -74,6 +74,12 @@ public class BlockStorageUnit extends BaseEntityBlock {
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
+            if (!(newState.getBlock() instanceof BlockStorageUnit)) {
+                BlockEntity be = level.getBlockEntity(pos);
+                if (be instanceof StorageUnitBlockEntity unit) {
+                    net.minecraft.world.Containers.dropContents(level, pos, unit);
+                }
+            }
             NetworkLocator.markNetworkDirty(level, pos);
         }
         super.onRemove(state, level, pos, newState, isMoving);

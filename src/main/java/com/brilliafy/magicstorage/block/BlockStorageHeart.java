@@ -73,4 +73,17 @@ public class BlockStorageHeart extends BaseEntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
         return createTickerHelper(blockEntityType, ModBlockEntities.STORAGE_HEART, StorageHeartBlockEntity::tick);
     }
+
+    //? < 26.1 {
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof StorageHeartBlockEntity heart) {
+                net.minecraft.world.Containers.dropContents(level, pos, heart);
+            }
+        }
+        super.onRemove(state, level, pos, newState, isMoving);
+    }
+    //?}
 }

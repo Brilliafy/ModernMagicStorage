@@ -16,8 +16,8 @@ platform {
 		required("minecraft") {
 			forgeLikeVersionRange = prop("deps.minecraft")
 		}
-		required("forge") {
-			forgeLikeVersionRange.set("[47.1.0,)")
+		required("neoforge") {
+			forgeLikeVersionRange.set("[${prop("deps.neoforge")},)")
 		}
 		optional("jei") { slug("jei") }
 		optional("curios") { slug("curios") }

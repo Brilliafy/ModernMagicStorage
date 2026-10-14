@@ -16,6 +16,11 @@ public class StationManager {
     private boolean hasBrewingStand;
     private boolean hasAnvil;
     private boolean hasEnchantingTable;
+    private boolean hasSmithingTable;
+    private boolean hasGrindstone;
+    private boolean hasStonecutter;
+    private boolean hasLoom;
+    private boolean hasCartographyTable;
     private boolean hasCuriosReforger;
     private boolean hasApotheosisScrapTome;
     private boolean hasApotheosisExtractionTome;
@@ -27,6 +32,11 @@ public class StationManager {
         hasBrewingStand = false;
         hasAnvil = false;
         hasEnchantingTable = false;
+        hasSmithingTable = false;
+        hasGrindstone = false;
+        hasStonecutter = false;
+        hasLoom = false;
+        hasCartographyTable = false;
         hasCuriosReforger = false;
         hasApotheosisScrapTome = false;
         hasApotheosisExtractionTome = false;
@@ -45,6 +55,16 @@ public class StationManager {
                 hasAnvil = true;
             } else if (stack.is(Items.ENCHANTING_TABLE)) {
                 hasEnchantingTable = true;
+            } else if (stack.is(Items.SMITHING_TABLE)) {
+                hasSmithingTable = true;
+            } else if (stack.is(Items.GRINDSTONE)) {
+                hasGrindstone = true;
+            } else if (stack.is(Items.STONECUTTER)) {
+                hasStonecutter = true;
+            } else if (stack.is(Items.LOOM)) {
+                hasLoom = true;
+            } else if (stack.is(Items.CARTOGRAPHY_TABLE)) {
+                hasCartographyTable = true;
             }
 
             ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
@@ -75,7 +95,9 @@ public class StationManager {
         if (stack.isEmpty()) return false;
         if (stack.is(Items.CRAFTING_TABLE) || stack.is(Items.FURNACE) || stack.is(Items.BLAST_FURNACE)
                 || stack.is(Items.SMOKER) || stack.is(Items.BREWING_STAND) || stack.is(Items.ANVIL)
-                || stack.is(Items.CHIPPED_ANVIL) || stack.is(Items.DAMAGED_ANVIL) || stack.is(Items.ENCHANTING_TABLE)) {
+                || stack.is(Items.CHIPPED_ANVIL) || stack.is(Items.DAMAGED_ANVIL) || stack.is(Items.ENCHANTING_TABLE)
+                || stack.is(Items.SMITHING_TABLE) || stack.is(Items.GRINDSTONE) || stack.is(Items.STONECUTTER)
+                || stack.is(Items.LOOM) || stack.is(Items.CARTOGRAPHY_TABLE)) {
             return true;
         }
 
@@ -98,6 +120,11 @@ public class StationManager {
     public boolean hasBrewingStand() { return hasBrewingStand; }
     public boolean hasAnvil() { return hasAnvil; }
     public boolean hasEnchantingTable() { return hasEnchantingTable; }
+    public boolean hasSmithingTable() { return hasSmithingTable; }
+    public boolean hasGrindstone() { return hasGrindstone; }
+    public boolean hasStonecutter() { return hasStonecutter; }
+    public boolean hasLoom() { return hasLoom; }
+    public boolean hasCartographyTable() { return hasCartographyTable; }
     public boolean hasCuriosReforger() { return hasCuriosReforger; }
     public boolean hasApotheosisScrapTome() { return hasApotheosisScrapTome; }
     public boolean hasApotheosisExtractionTome() { return hasApotheosisExtractionTome; }

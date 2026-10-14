@@ -183,20 +183,22 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             craftedCount += singleResult.getCount();
         }
 
-        if (craftedCount > 0) {
-            ItemStack totalCrafted = singleResult.copy();
-            totalCrafted.setCount(craftedCount);
+        int maxStack = singleResult.getMaxStackSize();
+        while (craftedCount > 0) {
+            int toGive = Math.min(craftedCount, maxStack);
+            craftedCount -= toGive;
+            ItemStack stackToGive = singleResult.copy();
+            stackToGive.setCount(toGive);
 
-            if (!player.getInventory().add(totalCrafted)) {
-                if (heart != null) {
-                    heart.insertItem(totalCrafted);
-                } else {
+            if (!player.getInventory().add(stackToGive)) {
+                ItemStack remainder = heart != null ? heart.insertItem(stackToGive) : stackToGive;
+                if (!remainder.isEmpty()) {
                     //? >= 26.1 {
                     /*if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                        player.spawnAtLocation(serverLevel, totalCrafted);
+                        player.spawnAtLocation(serverLevel, remainder);
                     }
                     *///?} < 26.1 {
-                    player.drop(totalCrafted, false);
+                    player.drop(remainder, false);
                     //?}
                 }
             }

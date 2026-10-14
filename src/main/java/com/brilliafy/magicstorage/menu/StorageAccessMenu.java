@@ -262,12 +262,14 @@ public class StorageAccessMenu extends AbstractContainerMenu {
             return ItemStack.EMPTY;
         }
         ItemStack stack = slot.getItem();
+        ItemStack copy = stack.copy();
         ItemStack remainder = heart.insertItem(stack);
-        if (remainder.getCount() != stack.getCount()) {
+        if (remainder.getCount() != copy.getCount()) {
             slot.set(remainder);
             slot.setChanged();
+            needsRefresh = true;
+            return copy;
         }
-        needsRefresh = true;
         return ItemStack.EMPTY;
     }
 

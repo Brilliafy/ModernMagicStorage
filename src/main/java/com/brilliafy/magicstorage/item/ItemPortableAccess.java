@@ -43,19 +43,25 @@ public class ItemPortableAccess extends Item {
         ItemStack stack = context.getItemInHand();
 
         if (player != null && player.isShiftKeyDown()) {
-            if (level.getBlockState(pos).getBlock() instanceof BlockRemoteAccess) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof StorageHeartBlockEntity) {
                 if (!level.isClientSide()) {
-                    BlockEntity be = level.getBlockEntity(pos);
+                    bindToNetwork(stack, pos, level.dimension().location().toString());
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound"), true);
+                }
+                return com.brilliafy.magicstorage.Constants.success(level);
+            } else if (level.getBlockState(pos).getBlock() instanceof BlockRemoteAccess) {
+                if (!level.isClientSide()) {
                     if (be instanceof RemoteAccessBlockEntity remote) {
                         BlockPos heartPos = remote.getHeartPos();
                         if (heartPos != null) {
                             bindToNetwork(stack, heartPos, level.dimension().location().toString());
                             com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound"), true);
-                            return InteractionResult.SUCCESS;
+                            return com.brilliafy.magicstorage.Constants.success(level);
                         }
                     }
                 }
-                return InteractionResult.SUCCESS;
+                return com.brilliafy.magicstorage.Constants.success(level);
             }
         }
         return super.useOn(context);
