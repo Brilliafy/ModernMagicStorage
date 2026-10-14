@@ -289,13 +289,14 @@ Copy the jar for your target Minecraft version and loader into your `.minecraft/
 
 ## Wiki Documentation
 
-For in-depth guides, check the detailed wiki documentation in the [`docs/`](docs/) directory:
+For in-depth guides, mechanical breakdowns, and the complete recipe catalog, check the official **[Modern Magic Storage Wiki](wiki/README.md)**:
 
-- [Getting Started and Multiblock Mechanics](docs/getting-started.md): Network building, BFS traversal rules, and chunk boundary management.
-- [Blocks and Storage Units](docs/blocks-and-storage-units.md): Technical specs, 8 storage unit tiers, in-place upgrade mechanics, and drop protection.
-- [Crafting Stations and Multi-Station GUI](docs/crafting-stations-and-gui.md): Deep-dive into every supported station, recipes, virtual furnace, and modded block integration.
-- [Remotes, Materials, and Progression](docs/remotes-and-materials.md): Wireless remote binding, ores, world generation, and progression materials.
-- [Third-Party Mod Integrations](docs/mod-integrations.md): JEI recipe transfer, Farmer's Delight, Apotheosis, Tetra, and accessory reforging.
+- **[Wiki Hub](wiki/README.md)**: Central wiki index and supported version matrix.
+- **[Getting Started](wiki/getting-started.md)**: Network building, BFS traversal rules, chunk boundary handling, and search controls.
+- **[Storage Network](wiki/storage-network.md)**: 8 storage unit tiers, in-place upgrade mechanics, ores, jewels, and wireless remotes.
+- **[Crafting Stations](wiki/crafting-stations.md)**: Multi-station GUI, right station panel, left storage overlay, virtual server-side furnace, and modded block integration.
+- **[Mod Integrations](wiki/integrations.md)**: JEI recipe transfer (+ button), Farmer's Delight, Apotheosis, Tetra, Curios API, and generic modded stations.
+- **[Recipe Catalog](wiki/recipes/README.md)**: Complete crafting patterns, shapeless formulas, smelting recipes, and upgrade paths for all items and blocks.
 
 ---
 
