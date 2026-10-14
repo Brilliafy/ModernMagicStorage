@@ -33,5 +33,50 @@ public class MagicStorageJeiPlugin implements IModPlugin {
                 36, // inventorySlotStart (36 player inventory slots)
                 36  // inventorySlotCount
         );
+        registration.addRecipeTransferHandler(
+                CraftingAccessMenu.class,
+                ModMenus.CRAFTING_ACCESS,
+                RecipeTypes.STONECUTTING,
+                73,
+                1,
+                36,
+                36
+        );
+        registration.addRecipeTransferHandler(
+                CraftingAccessMenu.class,
+                ModMenus.CRAFTING_ACCESS,
+                RecipeTypes.SMITHING,
+                73,
+                3,
+                36,
+                36
+        );
+        registration.addRecipeTransferHandler(
+                CraftingAccessMenu.class,
+                ModMenus.CRAFTING_ACCESS,
+                RecipeTypes.SMELTING,
+                73,
+                1,
+                36,
+                36
+        );
+        registration.addRecipeTransferHandler(
+                CraftingAccessMenu.class,
+                ModMenus.CRAFTING_ACCESS,
+                RecipeTypes.BLASTING,
+                73,
+                1,
+                36,
+                36
+        );
+        registration.addRecipeTransferHandler(
+                CraftingAccessMenu.class,
+                ModMenus.CRAFTING_ACCESS,
+                RecipeTypes.SMOKING,
+                73,
+                1,
+                36,
+                36
+        );
     }
 }

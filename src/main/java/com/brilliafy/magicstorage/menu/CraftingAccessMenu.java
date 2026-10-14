@@ -57,8 +57,21 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
         @Override
         public void onTake(Player player, ItemStack stack) {
+            TransientCraftingContainer craftSlots = menu.getCraftSlots();
+            ItemStack patternBackup = ItemStack.EMPTY;
+            int patternSlot = -1;
+            for (int i = 0; i < craftSlots.getContainerSize(); i++) {
+                if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusablePattern(craftSlots.getItem(i))) {
+                    patternSlot = i;
+                    patternBackup = craftSlots.getItem(i).copy();
+                    break;
+                }
+            }
             super.onTake(player, stack);
-            menu.slotsChanged(menu.getCraftSlots());
+            if (patternSlot != -1 && !patternBackup.isEmpty()) {
+                craftSlots.setItem(patternSlot, patternBackup);
+            }
+            menu.slotsChanged(craftSlots);
         }
     }
 
@@ -110,7 +123,10 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             ItemStack result = match.get().value().assemble(input);
             resultSlots.setItem(0, result);
         } else {
-            resultSlots.setItem(0, ItemStack.EMPTY);
+            ItemStack stationResult = com.brilliafy.magicstorage.storage.StationRecipeManager.computeStationResult(
+                craftSlots, level, heart != null ? heart.getStationManager() : null, player
+            );
+            resultSlots.setItem(0, stationResult);
         }
         *///?} < 26.1 && > 1.20.1 {
         CraftingInput input = craftSlots.asCraftInput();
@@ -119,7 +135,10 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             ItemStack result = match.get().value().assemble(input, level.registryAccess());
             resultSlots.setItem(0, result);
         } else {
-            resultSlots.setItem(0, ItemStack.EMPTY);
+            ItemStack stationResult = com.brilliafy.magicstorage.storage.StationRecipeManager.computeStationResult(
+                craftSlots, level, heart != null ? heart.getStationManager() : null, player
+            );
+            resultSlots.setItem(0, stationResult);
         }
         //?} <= 1.20.1 {
         /*Optional<CraftingRecipe> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftSlots, level);
@@ -127,7 +146,10 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             ItemStack result = match.get().assemble(craftSlots, level.registryAccess());
             resultSlots.setItem(0, result);
         } else {
-            resultSlots.setItem(0, ItemStack.EMPTY);
+            ItemStack stationResult = com.brilliafy.magicstorage.storage.StationRecipeManager.computeStationResult(
+                craftSlots, level, heart != null ? heart.getStationManager() : null, player
+            );
+            resultSlots.setItem(0, stationResult);
         }
         *///?}
     }
@@ -145,11 +167,16 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         for (int i = 0; i < 9; i++) {
             ItemStack inGrid = craftSlots.getItem(i);
             if (!inGrid.isEmpty()) {
-                int countAvailable = inGrid.getCount();
-                if (heart != null) {
-                    countAvailable += com.brilliafy.magicstorage.storage.StorageNetworkManager.countItem(heart.getValidUnits(), inGrid);
+                if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusablePattern(inGrid)) continue;
+                if (inGrid.isDamageableItem()) {
+                    maxCrafts = Math.min(maxCrafts, inGrid.getCount());
+                } else {
+                    int countAvailable = inGrid.getCount();
+                    if (heart != null) {
+                        countAvailable += com.brilliafy.magicstorage.storage.StorageNetworkManager.countItem(heart.getValidUnits(), inGrid);
+                    }
+                    maxCrafts = Math.min(maxCrafts, countAvailable);
                 }
-                maxCrafts = Math.min(maxCrafts, countAvailable);
             }
         }
 
@@ -164,6 +191,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             for (int i = 0; i < 9; i++) {
                 ItemStack req = craftSlots.getItem(i);
                 if (!req.isEmpty()) {
+                    if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusablePattern(req)) continue;
                     if (req.getCount() > 1) {
                         req.shrink(1);
                     } else if (heart != null) {

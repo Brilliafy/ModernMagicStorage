@@ -1,5 +1,7 @@
 package com.brilliafy.magicstorage.storage;
 
+import com.brilliafy.magicstorage.compat.apotheosis.ApotheosisCompat;
+import com.brilliafy.magicstorage.compat.tetra.TetraCompat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -12,6 +14,8 @@ public class StationManager {
 
     private boolean hasCraftingTable;
     private boolean hasFurnace;
+    private boolean hasBlastFurnace;
+    private boolean hasSmoker;
     private boolean hasBrewingStand;
     private boolean hasAnvil;
     private boolean hasEnchantingTable;
@@ -23,13 +27,17 @@ public class StationManager {
     private boolean hasFletchingTable;
     private boolean hasCauldron;
     private boolean hasCuriosReforger;
-    private boolean hasApotheosisScrapTome;
-    private boolean hasApotheosisExtractionTome;
     private boolean hasQualityEquipment;
+    private boolean hasApotheosisReforgingTable;
+    private boolean hasApotheosisSalvagingTable;
+    private boolean hasApotheosisGemCuttingTable;
+    private boolean hasTetraModularWorkbench;
 
     public void updateStations(List<ItemStack> stations) {
         hasCraftingTable = false;
         hasFurnace = false;
+        hasBlastFurnace = false;
+        hasSmoker = false;
         hasBrewingStand = false;
         hasAnvil = false;
         hasEnchantingTable = false;
@@ -41,16 +49,24 @@ public class StationManager {
         hasFletchingTable = false;
         hasCauldron = false;
         hasCuriosReforger = false;
-        hasApotheosisScrapTome = false;
-        hasApotheosisExtractionTome = false;
         hasQualityEquipment = false;
+        hasApotheosisReforgingTable = false;
+        hasApotheosisSalvagingTable = false;
+        hasApotheosisGemCuttingTable = false;
+        hasTetraModularWorkbench = false;
 
         for (ItemStack stack : stations) {
             if (stack.isEmpty()) continue;
 
             if (stack.is(Items.CRAFTING_TABLE)) {
                 hasCraftingTable = true;
-            } else if (stack.is(Items.FURNACE) || stack.is(Items.BLAST_FURNACE) || stack.is(Items.SMOKER)) {
+            } else if (stack.is(Items.FURNACE)) {
+                hasFurnace = true;
+            } else if (stack.is(Items.BLAST_FURNACE)) {
+                hasBlastFurnace = true;
+                hasFurnace = true;
+            } else if (stack.is(Items.SMOKER)) {
+                hasSmoker = true;
                 hasFurnace = true;
             } else if (stack.is(Items.BREWING_STAND)) {
                 hasBrewingStand = true;
@@ -74,6 +90,19 @@ public class StationManager {
                 hasCauldron = true;
             }
 
+            if (ApotheosisCompat.isReforgingTable(stack)) {
+                hasApotheosisReforgingTable = true;
+                hasCuriosReforger = true;
+            } else if (ApotheosisCompat.isSalvagingTable(stack)) {
+                hasApotheosisSalvagingTable = true;
+            } else if (ApotheosisCompat.isGemCuttingTable(stack)) {
+                hasApotheosisGemCuttingTable = true;
+            }
+
+            if (TetraCompat.isModularWorkbench(stack)) {
+                hasTetraModularWorkbench = true;
+            }
+
             ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
             String path = key.getPath();
             String namespace = key.getNamespace();
@@ -85,17 +114,6 @@ public class StationManager {
                 }
             } else if ("curios".equals(namespace) || "bountifulbaubles".equals(namespace)) {
                 if (path.contains("reforg") || path.contains("anvil") || path.contains("token") || path.contains("tablet")) {
-                    hasCuriosReforger = true;
-                }
-            } else if ("apotheosis".equals(namespace)) {
-                if (path.contains("scrap") || path.equals("scrap_tome")) {
-                    hasApotheosisScrapTome = true;
-                }
-                if (path.contains("extraction") || path.equals("extraction_tome")) {
-                    hasApotheosisExtractionTome = true;
-                }
-                if (path.contains("salvag") || path.contains("reforg")) {
-                    hasQualityEquipment = true;
                     hasCuriosReforger = true;
                 }
             }
@@ -113,13 +131,18 @@ public class StationManager {
             return true;
         }
 
+        if (ApotheosisCompat.isApotheosisStation(stack)) {
+            return true;
+        }
+
+        if (TetraCompat.isModularWorkbench(stack)) {
+            return true;
+        }
+
         ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String namespace = key.getNamespace();
         String path = key.getPath();
 
-        if ("apotheosis".equals(namespace) && (path.contains("scrap") || path.contains("extraction") || path.contains("tome") || path.contains("salvag") || path.contains("reforg"))) {
-            return true;
-        }
         if (("curios".equals(namespace) || "bountifulbaubles".equals(namespace) || "qualitytools".equals(namespace) || "quality_equipment".equals(namespace))
                 && (path.contains("reforg") || path.contains("anvil") || path.contains("token") || path.contains("station") || path.contains("tablet"))) {
             return true;
@@ -129,6 +152,8 @@ public class StationManager {
 
     public boolean hasCraftingTable() { return hasCraftingTable; }
     public boolean hasFurnace() { return hasFurnace; }
+    public boolean hasBlastFurnace() { return hasBlastFurnace; }
+    public boolean hasSmoker() { return hasSmoker; }
     public boolean hasBrewingStand() { return hasBrewingStand; }
     public boolean hasAnvil() { return hasAnvil; }
     public boolean hasEnchantingTable() { return hasEnchantingTable; }
@@ -140,7 +165,9 @@ public class StationManager {
     public boolean hasFletchingTable() { return hasFletchingTable; }
     public boolean hasCauldron() { return hasCauldron; }
     public boolean hasCuriosReforger() { return hasCuriosReforger; }
-    public boolean hasApotheosisScrapTome() { return hasApotheosisScrapTome; }
-    public boolean hasApotheosisExtractionTome() { return hasApotheosisExtractionTome; }
     public boolean hasQualityEquipment() { return hasQualityEquipment; }
+    public boolean hasApotheosisReforgingTable() { return hasApotheosisReforgingTable; }
+    public boolean hasApotheosisSalvagingTable() { return hasApotheosisSalvagingTable; }
+    public boolean hasApotheosisGemCuttingTable() { return hasApotheosisGemCuttingTable; }
+    public boolean hasTetraModularWorkbench() { return hasTetraModularWorkbench; }
 }

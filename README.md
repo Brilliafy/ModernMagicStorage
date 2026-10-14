@@ -18,13 +18,13 @@ Modern Magic Storage is built on **Jared's MultiLoader-Template** architecture, 
 | :---: | :---: | :---: | :---: | :--- |
 | **26.3** | `✓` | `✓` | — | `magicstorage-2.0.0-fabric+26.3.jar` / `magicstorage-2.0.0-neoforge+26.3.jar` |
 | **1.21.1** | `✓` | `✓` | — | `magicstorage-2.0.0-fabric+1.21.1.jar` / `magicstorage-2.0.0-neoforge+1.21.1.jar` |
-| **1.20.1** | `✓` | — | `✓` | `magicstorage-2.0.0-fabric+1.20.1.jar` / `magicstorage-2.0.0-forge+1.20.1.jar` |
+| **1.20.1** | `✓` | `✓` | `✓` | `magicstorage-2.0.0-fabric+1.20.1.jar` / `magicstorage-2.0.0-forge+1.20.1.jar` / `magicstorage-2.0.0-neoforge+1.20.1.jar` |
 
 ---
 
 ## Core Features
 
-- **Storage Heart**: Central network brain. Emits Light Level 15 and holds 20 crafting station items.
+- **Storage Heart**: Central network brain. Emits Light Level 15 and holds up to 20 crafting station blocks.
 - **8 Storage Unit Tiers**:
   1. **Basic**: 36 slots
   2. **Crimtane**: 54 slots
@@ -38,6 +38,14 @@ Modern Magic Storage is built on **Jared's MultiLoader-Template** architecture, 
 - **Unified Terminals**:
   - **Storage Access**: Search, sort, deposit, and extract network items.
   - **Crafting Access**: 3x3 crafting matrix connected directly to network inventory with instant shift-click crafting.
+- **Supported Stations & In-Terminal Recipes**:
+  - **Crafting Table**: Standard 3x3 shaping recipes.
+  - **Grindstone**: 2-item tool repair (combines durability with 5% bonus, strips non-curses) and 1-item disenchanting (resets repair cost, removes non-curses, converts enchanted book to standard book).
+  - **Stonecutter**: 1-item precision block cutting directly in the grid.
+  - **Smithing Table**: 3-item upgrades (Template + Base + Addition).
+  - **Furnace / Blast Furnace / Smoker**: Smelting, blasting, and smoking recipes in the grid when corresponding furnace blocks are installed.
+  - **Cartography Table**: Map zooming (+Paper), map locking (+Glass Pane), and map cloning (+Empty Map).
+  - **Loom**: Banner pattern crafting (Banner + Dye + optional Pattern item). Patterns are reusable and preserved in the grid.
 - **Wireless Portable Remotes**:
   - **Basic Remote**: 200 block radius.
   - **Advanced Remote**: Unlimited range in the same dimension.
@@ -55,9 +63,10 @@ All third-party integrations are soft/optional dependencies. If a mod is not pre
 
 | Mod | Modern Role & Compatibility |
 | :--- | :--- |
+| **[Apotheosis](https://github.com/Shadows-of-Fire/Apotheosis)** | Crafting station support: **Reforging Table** (re-rolling affix rarities with gem dust and materials), **Salvaging Table** (breaking down gear into scrap materials), and **Gem Cutting Table** (upgrading affix gems). |
+| **[Tetra](https://github.com/mickelus/tetra)** | Crafting station support: **Modular Workbench** (detecting modular tool components and honing materials). |
 | **[Curios API](https://github.com/TheIllusiveC4/Curios)** | Modern replacement for Baubles. Recognizes accessory reforging anvils as valid Heart stations. |
-| **[Apotheosis](https://github.com/Shadows-of-Fire/Apotheosis)** | Modern replacement for Disenchanters. Supports **Tome of Scrapping** and **Tome of Extraction** in the station slots. |
-| **[JEI (Just Enough Items)](https://github.com/mezz/JustEnoughItems)** | Dynamic `+` recipe transfer into Crafting Access, automatically pulling ingredients from network storage and inventory. |
+| **[JEI (Just Enough Items)](https://github.com/mezz/JustEnoughItems)** | Full recipe transfer support (`+`) into Crafting Access for Crafting, Stonecutting, Smithing, Smelting, Blasting, and Smoking, pulling ingredients from network storage and player inventory. |
 | **[Fair Experience](https://github.com/Brilliafy/ModernFairExperience)** | Companion mod. Seamlessly calculates fair raw XP costs for anvil and enchanting station operations. |
 | **[Quality Equipment](https://www.curseforge.com/minecraft/mc-mods/quality-equipment)** | Supports reforging station detection. |
 | **[Reskillable Reimagined](https://www.curseforge.com/minecraft/mc-mods/reskillable-reimagined)** | Validates player skill requirements before allowing access to restricted gear. |
