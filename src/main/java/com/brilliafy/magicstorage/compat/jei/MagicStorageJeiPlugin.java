@@ -37,7 +37,7 @@ public class MagicStorageJeiPlugin implements IModPlugin {
                 CraftingAccessMenu.class,
                 ModMenus.CRAFTING_ACCESS,
                 RecipeTypes.STONECUTTING,
-                73,
+                77, // Center slot (craftSlots index 4) targeting Stonecutter
                 1,
                 36,
                 36

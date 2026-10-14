@@ -1,5 +1,7 @@
 package com.brilliafy.magicstorage.storage;
 
+import com.brilliafy.magicstorage.compat.apotheosis.ApotheosisCompat;
+import com.brilliafy.magicstorage.compat.tetra.TetraCompat;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.Container;
@@ -36,7 +38,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 /**
  * Handles crafting recipes for installed storage heart stations:
  * Grindstone, Smithing Table, Stonecutter, Smoker, Blast Furnace, Furnace,
- * Cartography Table, and Loom.
+ * Cartography Table, Loom, Apotheosis stations (Reforging, Salvaging, Gem Cutting),
+ * and Tetra Modular Workbench.
  */
 public class StationRecipeManager {
 
@@ -44,105 +47,229 @@ public class StationRecipeManager {
         if (stations == null) return ItemStack.EMPTY;
 
         List<ItemStack> nonNull = new ArrayList<>();
+        int singleSlotIndex = -1;
         for (int i = 0; i < craftSlots.getContainerSize(); i++) {
             ItemStack s = craftSlots.getItem(i);
-            if (!s.isEmpty()) nonNull.add(s);
+            if (!s.isEmpty()) {
+                nonNull.add(s);
+                singleSlotIndex = i;
+            }
         }
         if (nonNull.isEmpty()) return ItemStack.EMPTY;
 
-        // 1. Grindstone (repair or disenchant)
-        if (stations.hasGrindstone()) {
-            if (nonNull.size() == 2) {
-                ItemStack s1 = nonNull.get(0);
-                ItemStack s2 = nonNull.get(1);
-                if (s1.is(s2.getItem()) && s1.isDamageableItem()) {
-                    ItemStack repaired = mergeGrindstoneItems(s1, s2);
-                    if (!repaired.isEmpty()) return repaired;
-                }
-            } else if (nonNull.size() == 1) {
-                ItemStack s = nonNull.get(0);
-                if (hasNonCurseEnchantments(s)) {
-                    ItemStack disenchanted = removeNonCursesFrom(s);
-                    if (!disenchanted.isEmpty()) return disenchanted;
-                }
-            }
-        }
-
-        // 2. Smithing Table
-        if (stations.hasSmithingTable()) {
-            if (nonNull.size() == 3) {
-                ItemStack s0 = craftSlots.getItem(0);
-                ItemStack s1 = craftSlots.getItem(1);
-                ItemStack s2 = craftSlots.getItem(2);
-                if (s0.isEmpty() || s1.isEmpty() || s2.isEmpty()) {
-                    s0 = nonNull.get(0);
-                    s1 = nonNull.get(1);
-                    s2 = nonNull.get(2);
-                }
-                ItemStack smithing = getSmithingResult(s0, s1, s2, level);
-                if (!smithing.isEmpty()) return smithing;
-            }
-        }
-
-        // 3. Single-item stations: Stonecutter, Smoker, Blast Furnace, Furnace
+        // 1. Single-Item Recipes (nonNull.size() == 1)
         if (nonNull.size() == 1) {
             ItemStack input = nonNull.get(0);
 
+            // A. Grindstone Disenchanting (highest priority for enchanted items)
+            if (stations.hasGrindstone() && hasNonCurseEnchantments(input)) {
+                ItemStack disenchanted = removeNonCursesFrom(input);
+                if (!disenchanted.isEmpty()) return disenchanted;
+            }
+
+            // B. Apotheosis Salvaging (highest priority for affix items)
+            if (stations.hasApotheosisSalvagingTable() && ApotheosisCompat.isAffixItem(input)) {
+                ItemStack salvaged = ApotheosisCompat.computeSalvageResult(input, level);
+                if (!salvaged.isEmpty()) return salvaged;
+            }
+
+            boolean canSmoke = stations.hasSmoker() && hasRecipe(input, RecipeType.SMOKING, level);
+            boolean canBlast = stations.hasBlastFurnace() && hasRecipe(input, RecipeType.BLASTING, level);
+            boolean canFurnace = stations.hasFurnace() && hasRecipe(input, RecipeType.SMELTING, level);
+            boolean canSmelt = canSmoke || canBlast || canFurnace;
+            boolean canCut = stations.hasStonecutter() && hasRecipe(input, RecipeType.STONECUTTING, level);
+
+            // Unambiguous resolution:
+            // Center Slot (Slot 4) explicitly targets Stonecutter
+            if (singleSlotIndex == 4 && canCut) {
+                return getSingleItemResult(input, RecipeType.STONECUTTING, level);
+            }
+
+            // Top-Left Slot (Slot 0) explicitly targets Smelting/Cooking
+            if (singleSlotIndex == 0 && canSmelt) {
+                if (canSmoke) return getSingleItemResult(input, RecipeType.SMOKING, level);
+                if (canBlast) return getSingleItemResult(input, RecipeType.BLASTING, level);
+                return getSingleItemResult(input, RecipeType.SMELTING, level);
+            }
+
+            // If the item can ONLY be smelted (e.g. ores, meat, sand, clay)
+            if (canSmelt && !canCut) {
+                if (canSmoke) return getSingleItemResult(input, RecipeType.SMOKING, level);
+                if (canBlast) return getSingleItemResult(input, RecipeType.BLASTING, level);
+                return getSingleItemResult(input, RecipeType.SMELTING, level);
+            }
+
+            // If the item can ONLY be cut (e.g. andesite, granite, diorite, prismarine)
+            if (canCut && !canSmelt) {
+                return getSingleItemResult(input, RecipeType.STONECUTTING, level);
+            }
+
+            // Overlapping item placed in other slots: Smelting takes precedence
+            if (canSmelt) {
+                if (canSmoke) return getSingleItemResult(input, RecipeType.SMOKING, level);
+                if (canBlast) return getSingleItemResult(input, RecipeType.BLASTING, level);
+                return getSingleItemResult(input, RecipeType.SMELTING, level);
+            }
+            if (canCut) {
+                return getSingleItemResult(input, RecipeType.STONECUTTING, level);
+            }
+        }
+
+        // 2. Two-Item Recipes (nonNull.size() == 2)
+        if (nonNull.size() == 2) {
+            ItemStack s0 = nonNull.get(0);
+            ItemStack s1 = nonNull.get(1);
+
+            // A. Grindstone tool repair (durability combine + 5% bonus, curses preserved)
+            if (stations.hasGrindstone() && s0.is(s1.getItem()) && s0.isDamageableItem()) {
+                ItemStack repaired = mergeGrindstoneItems(s0, s1);
+                if (!repaired.isEmpty()) return repaired;
+            }
+
+            // B. Stonecutter exact variant selection (input block + target sample)
             if (stations.hasStonecutter()) {
-                ItemStack cut = getSingleItemResult(input, RecipeType.STONECUTTING, level);
-                if (!cut.isEmpty()) return cut;
+                ItemStack variant = getStonecutterMatchingVariant(s0, s1, level);
+                if (variant.isEmpty()) {
+                    variant = getStonecutterMatchingVariant(s1, s0, level);
+                }
+                if (!variant.isEmpty()) return variant;
             }
 
-            if (stations.hasSmoker()) {
-                ItemStack smoked = getSingleItemResult(input, RecipeType.SMOKING, level);
-                if (!smoked.isEmpty()) return smoked;
-            }
-
-            if (stations.hasBlastFurnace()) {
-                ItemStack blasted = getSingleItemResult(input, RecipeType.BLASTING, level);
-                if (!blasted.isEmpty()) return blasted;
-            }
-
-            if (stations.hasFurnace()) {
-                ItemStack smelted = getSingleItemResult(input, RecipeType.SMELTING, level);
-                if (!smelted.isEmpty()) return smelted;
-            }
-        }
-
-        // 4. Cartography Table
-        if (stations.hasCartographyTable() && nonNull.size() == 2) {
-            ItemStack first = nonNull.get(0);
-            ItemStack second = nonNull.get(1);
-            if (first.is(Items.FILLED_MAP)) {
-                ItemStack carto = getCartographyResult(first, second, level);
-                if (!carto.isEmpty()) return carto;
-            } else if (second.is(Items.FILLED_MAP)) {
-                ItemStack carto = getCartographyResult(second, first, level);
-                if (!carto.isEmpty()) return carto;
-            }
-        }
-
-        // 5. Loom
-        if (stations.hasLoom()) {
-            ItemStack banner = null;
-            ItemStack dye = null;
-            ItemStack pattern = null;
-            for (ItemStack s : nonNull) {
-                if (s.getItem() instanceof BannerItem && banner == null) {
-                    banner = s;
-                } else if (isDyeItem(s) && dye == null) {
-                    dye = s;
-                } else if (isReusablePattern(s) && pattern == null) {
-                    pattern = s;
+            // C. Cartography Table
+            if (stations.hasCartographyTable()) {
+                if (s0.is(Items.FILLED_MAP)) {
+                    ItemStack carto = getCartographyResult(s0, s1, level);
+                    if (!carto.isEmpty()) return carto;
+                } else if (s1.is(Items.FILLED_MAP)) {
+                    ItemStack carto = getCartographyResult(s1, s0, level);
+                    if (!carto.isEmpty()) return carto;
                 }
             }
-            if (banner != null && dye != null && nonNull.size() <= 3) {
-                ItemStack loom = getLoomResult(banner, dye, pattern, level);
-                if (!loom.isEmpty()) return loom;
+
+            // D. Tetra Modular Workbench
+            if (stations.hasTetraModularWorkbench()) {
+                ItemStack wb = TetraCompat.computeWorkbenchResult(s0, s1);
+                if (wb.isEmpty()) {
+                    wb = TetraCompat.computeWorkbenchResult(s1, s0);
+                }
+                if (!wb.isEmpty()) return wb;
+            }
+
+            // E. Loom (Banner + Dye)
+            if (stations.hasLoom()) {
+                if (s0.getItem() instanceof BannerItem && isDyeItem(s1)) {
+                    ItemStack loom = getLoomResult(s0, s1, null, level);
+                    if (!loom.isEmpty()) return loom;
+                } else if (s1.getItem() instanceof BannerItem && isDyeItem(s0)) {
+                    ItemStack loom = getLoomResult(s1, s0, null, level);
+                    if (!loom.isEmpty()) return loom;
+                }
+            }
+        }
+
+        // 3. Three-Item Recipes (nonNull.size() == 3)
+        if (nonNull.size() == 3) {
+            ItemStack s0 = nonNull.get(0);
+            ItemStack s1 = nonNull.get(1);
+            ItemStack s2 = nonNull.get(2);
+
+            // A. Smithing Table
+            if (stations.hasSmithingTable()) {
+                ItemStack smithing = getSmithingPermutations(s0, s1, s2, level);
+                if (!smithing.isEmpty()) return smithing;
+            }
+
+            // B. Loom (Banner + Dye + Pattern)
+            if (stations.hasLoom()) {
+                ItemStack banner = null;
+                ItemStack dye = null;
+                ItemStack pattern = null;
+                for (ItemStack s : nonNull) {
+                    if (s.getItem() instanceof BannerItem && banner == null) banner = s;
+                    else if (isDyeItem(s) && dye == null) dye = s;
+                    else if (isReusablePattern(s) && pattern == null) pattern = s;
+                }
+                if (banner != null && dye != null && pattern != null) {
+                    ItemStack loom = getLoomResult(banner, dye, pattern, level);
+                    if (!loom.isEmpty()) return loom;
+                }
+            }
+
+            // C. Apotheosis Reforging Table (Gear + Rarity Material + Sigil/Dust)
+            if (stations.hasApotheosisReforgingTable()) {
+                ItemStack gear = null;
+                ItemStack mat = null;
+                ItemStack sigilOrDust = null;
+                for (ItemStack s : nonNull) {
+                    if (ApotheosisCompat.isRarityMaterial(s) && mat == null) {
+                        mat = s;
+                    } else if (ApotheosisCompat.isSigilOrDust(s) && sigilOrDust == null) {
+                        sigilOrDust = s;
+                    } else if (gear == null && s.isDamageableItem()) {
+                        gear = s;
+                    }
+                }
+                if (gear != null && mat != null && sigilOrDust != null) {
+                    ItemStack reforged = ApotheosisCompat.computeReforgingResult(gear, mat, sigilOrDust, level, player);
+                    if (!reforged.isEmpty()) return reforged;
+                }
+            }
+
+            // D. Apotheosis Gem Cutting Table (Gem + Dust + Duplicate/Material)
+            if (stations.hasApotheosisGemCuttingTable()) {
+                ItemStack gem = null;
+                ItemStack dust = null;
+                ItemStack third = null;
+                for (ItemStack s : nonNull) {
+                    if (ApotheosisCompat.isGemDust(s) && dust == null) {
+                        dust = s;
+                    } else if (ApotheosisCompat.isGem(s) && gem == null) {
+                        gem = s;
+                    } else if (third == null) {
+                        third = s;
+                    }
+                }
+                if (gem != null && dust != null) {
+                    ItemStack cut = ApotheosisCompat.computeGemCuttingResult(gem, dust, third, level);
+                    if (!cut.isEmpty()) return cut;
+                }
             }
         }
 
         return ItemStack.EMPTY;
+    }
+
+    public static boolean isReusableIngredient(TransientCraftingContainer craftSlots, int slot, Level level) {
+        if (slot < 0 || slot >= craftSlots.getContainerSize()) return false;
+        ItemStack item = craftSlots.getItem(slot);
+        if (isReusablePattern(item)) return true;
+        if (slot == 1 && craftSlots.getContainerSize() > 1) {
+            ItemStack s0 = craftSlots.getItem(0);
+            if (!s0.isEmpty() && !item.isEmpty() && level != null) {
+                if (!getStonecutterMatchingVariant(s0, item, level).isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasRecipe(ItemStack stack, RecipeType<?> type, Level level) {
+        return !getSingleItemResult(stack, type, level).isEmpty();
+    }
+
+    private static ItemStack getSmithingPermutations(ItemStack s0, ItemStack s1, ItemStack s2, Level level) {
+        ItemStack res = getSmithingResult(s0, s1, s2, level);
+        if (!res.isEmpty()) return res;
+        res = getSmithingResult(s0, s2, s1, level);
+        if (!res.isEmpty()) return res;
+        res = getSmithingResult(s1, s0, s2, level);
+        if (!res.isEmpty()) return res;
+        res = getSmithingResult(s1, s2, s0, level);
+        if (!res.isEmpty()) return res;
+        res = getSmithingResult(s2, s0, s1, level);
+        if (!res.isEmpty()) return res;
+        return getSmithingResult(s2, s1, s0, level);
     }
 
     //? > 1.20.1 {
@@ -245,6 +372,37 @@ public class StationRecipeManager {
         }
         return ItemStack.EMPTY;
     }
+
+    private static ItemStack getSmithingResult(ItemStack s0, ItemStack s1, ItemStack s2, Level level) {
+        SmithingRecipeInput input = new SmithingRecipeInput(s0, s1, s2);
+        Optional<RecipeHolder<SmithingRecipe>> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.SMITHING, input, level);
+        if (match.isPresent()) {
+            return match.get().value().assemble(input);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack getSingleItemResult(ItemStack stack, RecipeType<?> type, Level level) {
+        SingleRecipeInput input = new SingleRecipeInput(stack);
+        Optional<? extends RecipeHolder<? extends Recipe<SingleRecipeInput>>> match = level.getServer().getRecipeManager().getRecipeFor((RecipeType) type, input, level);
+        if (match.isPresent()) {
+            return match.get().value().assemble(input);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack getStonecutterMatchingVariant(ItemStack input, ItemStack sample, Level level) {
+        SingleRecipeInput sri = new SingleRecipeInput(input);
+        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+            if (holder.value() instanceof StonecutterRecipe sr && sr.matches(sri, level)) {
+                ItemStack res = sr.assemble(sri);
+                if (res.is(sample.getItem())) {
+                    return res;
+                }
+            }
+        }
+        return ItemStack.EMPTY;
+    }
     *///?} < 26.1 && > 1.20.1 {
     public static boolean isDyeItem(ItemStack stack) {
         return stack.getItem() instanceof DyeItem;
@@ -279,6 +437,38 @@ public class StationRecipeManager {
             result.update(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY,
                 layers -> new BannerPatternLayers.Builder().addAll(layers).add(finalPattern, color).build());
             return result;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack getSmithingResult(ItemStack s0, ItemStack s1, ItemStack s2, Level level) {
+        SmithingRecipeInput input = new SmithingRecipeInput(s0, s1, s2);
+        Optional<RecipeHolder<SmithingRecipe>> match = level.getRecipeManager().getRecipeFor(RecipeType.SMITHING, input, level);
+        if (match.isPresent()) {
+            return match.get().value().assemble(input, level.registryAccess());
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack getSingleItemResult(ItemStack stack, RecipeType<?> type, Level level) {
+        SingleRecipeInput input = new SingleRecipeInput(stack);
+        Optional<? extends RecipeHolder<? extends Recipe<SingleRecipeInput>>> match = level.getRecipeManager().getRecipeFor((RecipeType) type, input, level);
+        if (match.isPresent()) {
+            return match.get().value().assemble(input, level.registryAccess());
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack getStonecutterMatchingVariant(ItemStack input, ItemStack sample, Level level) {
+        SingleRecipeInput sri = new SingleRecipeInput(input);
+        var recipes = level.getRecipeManager().getAllRecipesFor(RecipeType.STONECUTTING);
+        for (RecipeHolder<StonecutterRecipe> holder : recipes) {
+            if (holder.value().matches(sri, level)) {
+                ItemStack res = holder.value().assemble(sri, level.registryAccess());
+                if (res.is(sample.getItem())) {
+                    return res;
+                }
+            }
         }
         return ItemStack.EMPTY;
     }
@@ -383,47 +573,7 @@ public class StationRecipeManager {
         BlockItem.setBlockEntityData(result, BlockEntityType.BANNER, tag);
         return result;
     }
-    *///?}
 
-    //? >= 26.1 {
-    /*
-    private static ItemStack getSmithingResult(ItemStack s0, ItemStack s1, ItemStack s2, Level level) {
-        SmithingRecipeInput input = new SmithingRecipeInput(s0, s1, s2);
-        Optional<RecipeHolder<SmithingRecipe>> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.SMITHING, input, level);
-        if (match.isPresent()) {
-            return match.get().value().assemble(input);
-        }
-        return ItemStack.EMPTY;
-    }
-
-    private static ItemStack getSingleItemResult(ItemStack stack, RecipeType<?> type, Level level) {
-        SingleRecipeInput input = new SingleRecipeInput(stack);
-        Optional<? extends RecipeHolder<? extends Recipe<SingleRecipeInput>>> match = level.getServer().getRecipeManager().getRecipeFor((RecipeType) type, input, level);
-        if (match.isPresent()) {
-            return match.get().value().assemble(input);
-        }
-        return ItemStack.EMPTY;
-    }
-    *///?} < 26.1 && > 1.20.1 {
-    private static ItemStack getSmithingResult(ItemStack s0, ItemStack s1, ItemStack s2, Level level) {
-        SmithingRecipeInput input = new SmithingRecipeInput(s0, s1, s2);
-        Optional<RecipeHolder<SmithingRecipe>> match = level.getRecipeManager().getRecipeFor(RecipeType.SMITHING, input, level);
-        if (match.isPresent()) {
-            return match.get().value().assemble(input, level.registryAccess());
-        }
-        return ItemStack.EMPTY;
-    }
-
-    private static ItemStack getSingleItemResult(ItemStack stack, RecipeType<?> type, Level level) {
-        SingleRecipeInput input = new SingleRecipeInput(stack);
-        Optional<? extends RecipeHolder<? extends Recipe<SingleRecipeInput>>> match = level.getRecipeManager().getRecipeFor((RecipeType) type, input, level);
-        if (match.isPresent()) {
-            return match.get().value().assemble(input, level.registryAccess());
-        }
-        return ItemStack.EMPTY;
-    }
-    //?} <= 1.20.1 {
-    /*
     private static ItemStack getSmithingResult(ItemStack s0, ItemStack s1, ItemStack s2, Level level) {
         Container container = new SimpleContainer(s0, s1, s2);
         Optional<SmithingRecipe> match = level.getRecipeManager().getRecipeFor(RecipeType.SMITHING, container, level);
@@ -438,6 +588,20 @@ public class StationRecipeManager {
         Optional<? extends Recipe<Container>> match = level.getRecipeManager().getRecipeFor((RecipeType) type, container, level);
         if (match.isPresent()) {
             return match.get().assemble(container, level.registryAccess());
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack getStonecutterMatchingVariant(ItemStack input, ItemStack sample, Level level) {
+        Container container = new SimpleContainer(input);
+        var recipes = level.getRecipeManager().getAllRecipesFor(RecipeType.STONECUTTING);
+        for (StonecutterRecipe recipe : recipes) {
+            if (recipe.matches(container, level)) {
+                ItemStack res = recipe.assemble(container, level.registryAccess());
+                if (res.is(sample.getItem())) {
+                    return res;
+                }
+            }
         }
         return ItemStack.EMPTY;
     }

@@ -11,6 +11,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 //? > 1.20.1 {
@@ -61,7 +63,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             ItemStack patternBackup = ItemStack.EMPTY;
             int patternSlot = -1;
             for (int i = 0; i < craftSlots.getContainerSize(); i++) {
-                if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusablePattern(craftSlots.getItem(i))) {
+                if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusableIngredient(craftSlots, i, menu.level)) {
                     patternSlot = i;
                     patternBackup = craftSlots.getItem(i).copy();
                     break;
@@ -115,7 +117,31 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         }
     }
 
+    private boolean isGrindstoneRepairInput() {
+        if (heart == null || !heart.getStationManager().hasGrindstone()) return false;
+        List<ItemStack> nonNull = new ArrayList<>();
+        for (int i = 0; i < craftSlots.getContainerSize(); i++) {
+            ItemStack s = craftSlots.getItem(i);
+            if (!s.isEmpty()) nonNull.add(s);
+        }
+        if (nonNull.size() == 2) {
+            ItemStack s0 = nonNull.get(0);
+            ItemStack s1 = nonNull.get(1);
+            return s0.is(s1.getItem()) && s0.isDamageableItem();
+        }
+        return false;
+    }
+
     protected void updateCraftingResult() {
+        // Grindstone repair takes precedence over vanilla's un-enchanted repair
+        if (isGrindstoneRepairInput()) {
+            ItemStack stationResult = com.brilliafy.magicstorage.storage.StationRecipeManager.computeStationResult(
+                craftSlots, level, heart != null ? heart.getStationManager() : null, player
+            );
+            resultSlots.setItem(0, stationResult);
+            return;
+        }
+
         //? >= 26.1 {
         /*CraftingInput input = craftSlots.asCraftInput();
         Optional<RecipeHolder<CraftingRecipe>> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
@@ -167,7 +193,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         for (int i = 0; i < 9; i++) {
             ItemStack inGrid = craftSlots.getItem(i);
             if (!inGrid.isEmpty()) {
-                if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusablePattern(inGrid)) continue;
+                if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusableIngredient(craftSlots, i, level)) continue;
                 if (inGrid.isDamageableItem()) {
                     maxCrafts = Math.min(maxCrafts, inGrid.getCount());
                 } else {
@@ -191,7 +217,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             for (int i = 0; i < 9; i++) {
                 ItemStack req = craftSlots.getItem(i);
                 if (!req.isEmpty()) {
-                    if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusablePattern(req)) continue;
+                    if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusableIngredient(craftSlots, i, level)) continue;
                     if (req.getCount() > 1) {
                         req.shrink(1);
                     } else if (heart != null) {

@@ -40,12 +40,17 @@ Modern Magic Storage is built on **Jared's MultiLoader-Template** architecture, 
   - **Crafting Access**: 3x3 crafting matrix connected directly to network inventory with instant shift-click crafting.
 - **Supported Stations & In-Terminal Recipes**:
   - **Crafting Table**: Standard 3x3 shaping recipes.
-  - **Grindstone**: 2-item tool repair (combines durability with 5% bonus, strips non-curses) and 1-item disenchanting (resets repair cost, removes non-curses, converts enchanted book to standard book).
-  - **Stonecutter**: 1-item precision block cutting directly in the grid.
-  - **Smithing Table**: 3-item upgrades (Template + Base + Addition).
-  - **Furnace / Blast Furnace / Smoker**: Smelting, blasting, and smoking recipes in the grid when corresponding furnace blocks are installed.
+  - **Grindstone**: 2-item tool repair (combines durability with 5% max-damage bonus, preserves curses, strips non-curses) and 1-item disenchanting (resets repair cost, removes non-curses, converts enchanted book to standard book). Explicitly prioritized over vanilla un-enchanted repair to prevent recipe conflicts.
+  - **Stonecutter**: 1-item precision block cutting directly in the grid. Dual-purpose blocks (e.g. Cobblestone, Stone) resolve to Smelting in slot 0 (top-left) and Stonecutting in slot 4 (center). Exact variant selection is supported by placing the input block in slot 0 and a sample target in slot 1 (the sample template is preserved and not consumed).
+  - **Smithing Table**: 3-item upgrades (Template + Base + Addition) with automatic permutation matching.
+  - **Furnace / Blast Furnace / Smoker**: Smelting, blasting, and smoking recipes directly in the grid when the corresponding furnace stations are installed in the Heart.
   - **Cartography Table**: Map zooming (+Paper), map locking (+Glass Pane), and map cloning (+Empty Map).
-  - **Loom**: Banner pattern crafting (Banner + Dye + optional Pattern item). Patterns are reusable and preserved in the grid.
+  - **Loom**: Banner pattern crafting (Banner + Dye + optional Pattern item). Banner pattern items are reusable and preserved in the grid.
+  - **Apotheosis Stations**:
+    - **Reforging Table**: Re-rolling affix rarities using gem dust and materials.
+    - **Salvaging Table**: Breaking down affix gear into scrap materials.
+    - **Gem Cutting Table**: Upgrading affix gems to higher rarity tiers.
+  - **Tetra Modular Workbench**: Modular tool maintenance (detects modular tool components and honing/repair materials, repairing tools and advancing hone progress while strictly preserving modular schemas and socketed upgrades).
 - **Wireless Portable Remotes**:
   - **Basic Remote**: 200 block radius.
   - **Advanced Remote**: Unlimited range in the same dimension.
