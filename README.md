@@ -4,169 +4,304 @@
 
 # Modern Magic Storage
 
-A modern, multi-loader, multi-version modular storage network mod for Minecraft inspired by Terraria's *Magic Storage*.
+A modern, multi-loader, multi-version modular storage network mod for Minecraft inspired by Terraria's Magic Storage mod.
 
-Centralizes chest rooms into an expandable, unified **Storage Heart** network with 8 modular storage unit tiers, wireless portable remotes, and connected **Crafting Access** terminals featuring dynamic station detection and instant recipe crafting.
+Modern Magic Storage replaces cluttered chest rooms with an expandable, centralized network powered by a **Storage Heart**. Store hundreds of thousands of items across 8 storage unit tiers, access your network from anywhere with wireless remotes, and craft with dozens of crafting stations in a single unified interface.
 
 ---
 
-## Supported Versions & Loaders
+## Table of Contents
 
-Modern Magic Storage is built on **Jared's MultiLoader-Template** architecture, **Stonecutter** (`dev.kikugie.stonecutter`), **MixinExtras**, and **Parchment Mappings**. Every release targets 6 distinct loader and Minecraft version platforms:
+- [Supported Versions and Loaders](#supported-versions-and-loaders)
+- [Quick Start Guide](#quick-start-guide)
+- [Core Blocks](#core-blocks)
+  - [Storage Heart](#storage-heart)
+  - [Storage Units (8 Tiers)](#storage-units-8-tiers)
+  - [Storage Access](#storage-access)
+  - [Crafting Access](#crafting-access)
+  - [Remote Access](#remote-access)
+- [The Interactive Multi-Station GUI](#the-interactive-multi-station-gui)
+  - [Right Station Selection Panel](#right-station-selection-panel)
+  - [Left Storage Network Overlay](#left-storage-network-overlay)
+  - [Virtual Server-Side Furnace](#virtual-server-side-furnace)
+  - [Instant Shift-Crafting](#instant-shift-crafting)
+  - [Safe Item Ejection](#safe-item-ejection)
+- [Supported Crafting Stations](#supported-crafting-stations)
+  - [Vanilla Stations](#vanilla-stations)
+  - [Farmer's Delight Integration](#farmers-delight-integration)
+  - [Apotheosis Integration](#apotheosis-integration)
+  - [Tetra Integration](#tetra-integration)
+  - [Modded Stations Support](#modded-stations-support)
+- [Wireless Portable Remotes](#wireless-portable-remotes)
+- [Materials, Ores, and Progression](#materials-ores-and-progression)
+- [Search and Sorting Syntax](#search-and-sorting-syntax)
+- [Third-Party Mod Integrations](#third-party-mod-integrations)
+- [Local Testing and Building](#local-testing-and-building)
+- [Wiki Documentation](#wiki-documentation)
+- [Credits and License](#credits-and-license)
+
+---
+
+## Supported Versions and Loaders
+
+Modern Magic Storage is built on Jared's MultiLoader-Template architecture and Stonecutter (`dev.kikugie.stonecutter`). Every release targets 7 distinct loader and Minecraft version platforms:
 
 | Minecraft Version | Fabric | NeoForge | Forge | Output File |
 | :---: | :---: | :---: | :---: | :--- |
-| **26.3** | `✓` | `✓` | — | `magicstorage-2.0.0-fabric+26.3.jar` / `magicstorage-2.0.0-neoforge+26.3.jar` |
-| **1.21.1** | `✓` | `✓` | — | `magicstorage-2.0.0-fabric+1.21.1.jar` / `magicstorage-2.0.0-neoforge+1.21.1.jar` |
+| **26.3** | `✓` | `✓` | N/A | `magicstorage-2.0.0-fabric+26.3.jar` / `magicstorage-2.0.0-neoforge+26.3.jar` |
+| **1.21.1** | `✓` | `✓` | N/A | `magicstorage-2.0.0-fabric+1.21.1.jar` / `magicstorage-2.0.0-neoforge+1.21.1.jar` |
 | **1.20.1** | `✓` | `✓` | `✓` | `magicstorage-2.0.0-fabric+1.20.1.jar` / `magicstorage-2.0.0-forge+1.20.1.jar` / `magicstorage-2.0.0-neoforge+1.20.1.jar` |
 
 ---
 
-## Core Features
+## Quick Start Guide
 
-- **Storage Heart**: Central network brain. Emits Light Level 15 and holds up to 20 crafting station blocks.
-- **8 Storage Unit Tiers**:
-  1. **Basic**: 36 slots
-  2. **Crimtane**: 54 slots
-  3. **Demonite**: 54 slots
-  4. **Hellstone**: 90 slots
-  5. **Hallowed**: 135 slots
-  6. **Blue Chlorophyte**: 180 slots
-  7. **Luminite**: 252 slots
-  8. **Terra**: 360 slots
-- **In-Place Upgrades**: Shift-right-click an existing storage unit with an upgrade item to expand its capacity without dropping stored items.
-- **Unified Terminals**:
-  - **Storage Access**: Search, sort, deposit, and extract network items.
-  - **Crafting Access**: 3x3 crafting matrix connected directly to network inventory with instant shift-click crafting.
-- **Interactive Multi-Station GUI**:
-  - **Right Station Selection Panel**: Displays 1:1 icons of all crafting stations currently installed in the Storage Heart with a responsive scrollbar. Clicking any icon instantly adapts the terminal into that station's interface (Crafting Table, Furnace, Stonecutter, Smithing Table, etc.).
-  - **Left Storage Network Overlay**: A live 3-column scrollable viewport into network items directly embedded on the left side of every station interface. Click items to withdraw stacks or single units into inventory/cursor, or click the panel with carried items to deposit them directly back into network storage.
-  - **Virtual Server-Side Furnace**: When a furnace station is installed, the Storage Heart contains a dedicated persistent virtual furnace ticking continuously on the server. Smelting and fuel burn progress continue even when players close the terminal or leave the area. Supports standard furnace fuels, recipe cook times, and container remainders (e.g. empty buckets from lava).
-  - **Zero Item Loss / Safe Ejection**: Closing the Crafting Access GUI or switching between station tabs automatically returns transient ingredients into network storage or the player's inventory—items are never deleted or voided.
-  - **Procedural UI Textures**: Custom GUI borders, bevels, station slots, progress arrows, flames, and scrollbar tracks are generated with Python Pillow (`station_panel.png`, `storage_overlay.png`, `station_widgets.png`).
-- **Supported Stations & In-Terminal Recipes**:
-  - **Crafting Table**: Standard 3x3 shaping recipes.
-  - **Grindstone**: 2-item tool repair (combines durability with 5% max-damage bonus, preserves curses, strips non-curses) and 1-item disenchanting (resets repair cost, removes non-curses, converts enchanted book to standard book). Explicitly prioritized over vanilla un-enchanted repair to prevent recipe conflicts.
-  - **Stonecutter**: 1-item precision block cutting directly in the grid. Dual-purpose blocks (e.g. Cobblestone, Stone) resolve to Smelting in slot 0 (top-left) and Stonecutting in slot 4 (center). Exact variant selection is supported by placing the input block in slot 0 and a sample target in slot 1 (the sample template is preserved and not consumed). In Stonecutter mode, clickable recipe variant buttons appear directly in the interface.
-  - **Smithing Table**: 3-item upgrades (Template + Base + Addition) with automatic permutation matching.
-  - **Furnace / Blast Furnace / Smoker**: Smelting, blasting, and smoking recipes directly in the grid when the corresponding furnace stations are installed in the Heart, plus continuous background smelting via the virtual furnace.
-  - **Cartography Table**: Map zooming (+Paper), map locking (+Glass Pane), and map cloning (+Empty Map).
-  - **Loom**: Banner pattern crafting (Banner + Dye + optional Pattern item). Banner pattern items are reusable and preserved in the grid.
-  - **Farmer's Delight Stations**:
-    - **Cooking Pot**: 1 to 6 shapeless meal ingredients + required container (e.g. Bowl, Glass Bottle) directly in the grid. Validates required serving containers and produces hot meals.
-    - **Cutting Board**: Input item + cutting tool (Knife, Axe, Shears) in any grid arrangement. Accurately damages tool durability by 1, keeps the tool in the crafting grid, consumes the ingredient, produces the primary slice, and drops all configured secondary/chance drops (e.g. Tree Bark, Straw) with sound effects.
-    - **Stove & Skillet**: Recognized as valid heating and cooking stations within the Storage Heart.
-  - **Apotheosis Stations**:
-    - **Reforging Table**: Re-rolling affix rarities using gem dust and materials.
-    - **Salvaging Table**: Breaking down affix gear into scrap materials.
-    - **Gem Cutting Table**: Upgrading affix gems to higher rarity tiers.
-  - **Tetra Modular Workbench**: Modular tool maintenance (detects modular tool components and honing/repair materials, repairing tools and advancing hone progress while strictly preserving modular schemas and socketed upgrades).
-- **Wireless Portable Remotes**:
-  - **Basic Remote**: 200 block radius.
-  - **Advanced Remote**: Unlimited range in the same dimension.
-  - **Ultimate Remote**: Unlimited range across all dimensions.
-- **New Materials & Ores**:
-  - **Hellstone**: Spawns in the Nether below Y 31.
-  - **Luminite Ore**: Rare end-game ore.
-  - **Shadow Diamond** & **Radiant Jewel**: Rare components used for high-tier storage upgrades.
+1. **Craft a Storage Heart**: The central brain of your storage network.
+2. **Craft at least one Storage Unit**: Basic Storage Units hold 36 item slots each.
+3. **Place the Blocks Adjacent to Each Other**:
+   - The Storage Heart must connect to Storage Units, Storage Access, or Crafting Access blocks directly or via a chain of adjacent network blocks.
+   - Up to 1024 connected network blocks are automatically discovered using breadth-first search (BFS).
+4. **Access Your Items**:
+   - Right-click the Storage Heart or an adjacent **Storage Access** block to open the terminal.
+   - Search, sort, deposit, and withdraw items.
+5. **Craft Directly from Storage**:
+   - Place a **Crafting Access** block adjacent to the network.
+   - Shift-right-click the Storage Heart while holding crafting stations (Crafting Table, Furnace, Grindstone, etc.) to install them into the Heart.
+   - Open the Crafting Access block to see your installed stations on the right panel and craft directly using items stored in the network.
 
 ---
 
-## Modern Mod Integrations
+## Core Blocks
 
-All third-party integrations are soft/optional dependencies. If a mod is not present, Magic Storage runs normally without crashing:
+### Storage Heart
+- **Registry ID**: `magicstorage:storage_heart`
+- **Hardness**: 3.0 | **Resistance**: 6.0 | **Light Level**: 15
+- **Role**: The central multiblock controller. Coordinates all connected Storage Units, routes item insertion and extraction, maintains the virtual furnace, and holds up to 20 installed crafting stations.
+- **Interactions**:
+  - **Right-Click**: Opens the Storage Access network terminal directly from the Heart.
+  - **Shift-Right-Click with a Station**: Installs the held station into the Heart (holds up to 20 stations).
+  - **Shift-Right-Click with Empty Hand**: Removes the most recently installed station and returns it to your inventory.
+- **Safety**: When broken, the Storage Heart safely drops all installed station items and furnace contents into the world and notifies connected access terminals.
 
-| Mod | Modern Role & Compatibility |
+### Storage Units (8 Tiers)
+- **Role**: Modular item vaults that expand network capacity.
+- **In-Place Upgrades**: You never need to break an existing unit to upgrade it. Shift-right-click any placed Storage Unit with a higher-tier upgrade item to instantly increase its capacity. All stored items are retained with zero risk of loss.
+- **Individual Access**: Right-clicking a Storage Unit opens its direct inventory view.
+
+| Tier | Block Registry ID | Upgrade Item ID | Slot Capacity | Notes |
+| :--- | :--- | :--- | :---: | :--- |
+| **Basic** | `magicstorage:storage_unit_basic` | N/A (Base Block) | 36 slots | Equivalent to a single chest plus hotbar. |
+| **Crimtane** | `magicstorage:storage_unit_crimtane` | `magicstorage:upgrade_crimtane` | 54 slots | Equivalent to a double chest. |
+| **Demonite** | `magicstorage:storage_unit_demonite` | `magicstorage:upgrade_demonite` | 54 slots | Alternate evil ore tier. |
+| **Hellstone** | `magicstorage:storage_unit_hellstone` | `magicstorage:upgrade_hellstone` | 90 slots | Crafted with Hellstone Bars from the Nether. |
+| **Hallowed** | `magicstorage:storage_unit_hallowed` | `magicstorage:upgrade_hallowed` | 135 slots | Mid-game high capacity storage. |
+| **Blue Chlorophyte** | `magicstorage:storage_unit_blue_chlorophyte` | `magicstorage:upgrade_blue_chlorophyte` | 180 slots | Advanced biological storage. |
+| **Luminite** | `magicstorage:storage_unit_luminite` | `magicstorage:upgrade_luminite` | 252 slots | End-game tier crafted with Luminite Bars. |
+| **Terra** | `magicstorage:storage_unit_terra` | `magicstorage:upgrade_terra` | 360 slots | Ultimate storage vault holding 360 item stacks. |
+
+### Storage Access
+- **Registry ID**: `magicstorage:storage_access`
+- **Role**: Dedicated network inventory terminal. Place anywhere adjacent to the network to search, filter, sort, deposit, and extract stored items.
+
+### Crafting Access
+- **Registry ID**: `magicstorage:crafting_access`
+- **Role**: Unified crafting terminal connected directly to your storage network and all stations installed in the Storage Heart.
+
+### Remote Access
+- **Registry ID**: `magicstorage:remote_access`
+- **Role**: Acts as a remote relay point for wireless access tools. Shift-right-clicking a Remote Access block with a Portable Access remote binds the remote to the connected Storage Heart.
+
+---
+
+## The Interactive Multi-Station GUI
+
+The Crafting Access terminal features a custom, procedurally textured multi-station interface with seamless network integration.
+
+### Right Station Selection Panel
+- Located on the right side of the Crafting Access GUI.
+- Displays 1:1 pixel icons of every crafting station installed in the Storage Heart.
+- Features a smooth vertical scrollbar when more than 6 stations are installed.
+- Highlights the currently active station with a gold border.
+- Hovering over any station icon displays its name and interaction hints.
+- Left-clicking any station icon switches the terminal interface to that station.
+
+### Left Storage Network Overlay
+- Located on the left side of the terminal interface.
+- A live 3-column scrollable viewport into items currently stored in the Magic Storage network.
+- **Left-Click an Item**: Withdraws a full stack into your hand or cursor.
+- **Right-Click an Item**: Withdraws half of the stack.
+- **Shift-Click an Item**: Quick-moves the stack directly into your player inventory.
+- **Click with Carried Item**: Deposits your cursor item directly into the network.
+
+### Virtual Server-Side Furnace
+- When a Furnace, Blast Furnace, or Smoker is installed in the Storage Heart, the Heart activates a dedicated virtual furnace.
+- Smelting happens continuously on the server, even after you close the GUI or leave the chunk.
+- **Catch-Up Smelting**: If the chunk unloads while smelting is in progress, the Storage Heart calculates elapsed game ticks upon reload and catches up smelting progress automatically.
+- Dedicated slots: Input slot (top), Fuel slot (bottom), and Output slot (right).
+- Features animated burning flame indicator and cook progress arrow.
+- Preserves fuel remainders (for example, empty buckets when using lava buckets as fuel).
+
+### Instant Shift-Crafting
+- Shift-clicking the crafting result slot crafts as many items as possible in a single click (up to player inventory capacity).
+- Missing ingredients are automatically pulled from the Magic Storage network.
+- Secondary drops (such as Tree Bark from cutting logs on a Cutting Board) are scaled by the craft count and awarded to the player.
+
+### Safe Item Ejection
+- Transient ingredients left in the crafting grid or station slots are never voided.
+- Closing the GUI or switching station modes automatically returns leftover items into the Magic Storage network first, or to your inventory/feet if the network is full.
+- Any item held on the cursor when closing the GUI is safely returned to network storage.
+
+---
+
+## Supported Crafting Stations
+
+Install stations by shift-right-clicking the Storage Heart with the station item in hand. Up to 20 stations can be installed simultaneously.
+
+### Vanilla Stations
+- **Crafting Table**: Standard 3x3 shaped and shapeless crafting matrix.
+- **Virtual Furnace / Blast Furnace / Smoker**: Server-side continuous smelting, ore blasting, and food smoking with animated fire and cook progress.
+- **Stonecutter**: Single-item block cutting directly in the grid. Clickable variant buttons appear in the UI allowing you to pick your desired cut block. Supports variant sampling in the crafting grid.
+- **Smithing Table**: Modern 3-slot smithing interface supporting Smithing Template + Base Item + Material Addition.
+- **Grindstone**: 2-slot tool repair (combines durability with a 5% bonus and preserves curses) and 1-slot disenchanting (resets prior work penalty, strips non-curses, converts enchanted books back to normal books).
+- **Loom**: Banner pattern crafting with Banner, Dye, and optional Banner Pattern item. Banner patterns are reusable and preserved.
+- **Cartography Table**: Map zooming (Map + Paper), map locking (Map + Glass Pane), and map cloning (Map + Empty Map).
+- **Anvil**: Repairing tools, combining enchantments, and renaming items.
+- **Enchanting Table, Brewing Stand, Fletching Table, Cauldron**: Fully recognized as valid Heart stations.
+
+### Farmer's Delight Integration
+- **Cooking Pot**: 1 to 6 shapeless meal ingredients plus required serving container (Bowl, Glass Bottle). Validates recipes and outputs hot dishes.
+- **Cutting Board**: Input block/item + cutting tool (Knife, Axe, Shears). Deals 1 point of durability damage to the tool, preserves the tool in the grid, consumes the ingredient, produces the primary cut, and grants secondary drops (such as Tree Bark or Straw) with sound effects.
+- **Stove and Skillet**: Recognized as valid cooking and heating stations.
+
+### Apotheosis Integration
+- **Reforging Table**: Re-rolling affix rarities on gear using gem dust and materials.
+- **Salvaging Table**: Breaking down affix equipment into scrap materials.
+- **Gem Cutting Table**: Upgrading affix gems to higher rarity tiers.
+
+### Tetra Integration
+- **Modular Workbench**: Detects modular tool components and honing materials. Repairs modular tools and advances hone progress while strictly preserving modular schemas and socketed upgrades.
+
+### Modded Stations Support
+- Any modded station block that opens a GUI or implements `MenuProvider` can be placed into the Storage Heart.
+- Modded stations appear on the right panel with 1:1 block icons.
+- **Left-Click**: Selects the modded station mode in the terminal.
+- **Shift-Click**: Opens the native GUI of the modded station. Remote distance checks are bypassed so you can use modded stations from anywhere in the world.
+
+---
+
+## Wireless Portable Remotes
+
+Portable remotes grant access to your storage network from anywhere in your world.
+
+### How to Bind a Remote
+1. Hold the Portable Access remote in your hand.
+2. Shift-right-click on a **Storage Heart** or **Remote Access** block.
+3. A confirmation message will appear in your action bar confirming the bound coordinates and dimension.
+4. Right-click in the air at any time to open your storage terminal remotely.
+
+### Remote Tiers
+
+| Remote | Item Registry ID | Range | Dimensional Scope |
+| :--- | :--- | :---: | :--- |
+| **Portable Access (Pre-HM)** | `magicstorage:portable_access_prehm` | 200 blocks | Same dimension only. |
+| **Portable Access (HM)** | `magicstorage:portable_access_hm` | Unlimited | Same dimension only. |
+| **Portable Access (Ultimate)** | `magicstorage:portable_access_ultimate` | Unlimited | Cross-dimensional (Overworld, Nether, End, modded dimensions). |
+| **Portable Crafting Access (Pre-HM)** | `magicstorage:portable_crafting_access_prehm` | 200 blocks | Same dimension only. Full crafting and station access. |
+| **Portable Crafting Access (HM)** | `magicstorage:portable_crafting_access_hm` | Unlimited | Same dimension only. Full crafting and station access. |
+| **Portable Crafting Access (Ultimate)** | `magicstorage:portable_crafting_access_ultimate` | Unlimited | Cross-dimensional. Full crafting and station access. |
+
+---
+
+## Materials, Ores, and Progression
+
+### Ores and Generation
+- **Hellstone Ore** (`magicstorage:hellstone_ore`):
+  - Spawns in the Nether between Y 5 and Y 31 in veins of up to 12 blocks.
+  - Requires an iron-tier pickaxe or better to mine.
+  - Smelted into **Hellstone Fragments** and combined with obsidian to forge **Hellstone Bars**.
+- **Luminite Ore** (`magicstorage:luminite_ore`):
+  - Spawns in the End between Y 10 and Y 65 embedded in End Stone in veins of up to 8 blocks.
+  - Requires a diamond-tier pickaxe or better to mine.
+  - Smelted into **Luminite Fragments** and forged into **Luminite Bars**.
+
+### Crafting Materials
+- **Storage Component** (`magicstorage:storage_component`): The fundamental building block crafted from wood, iron ingots, and chests. Used to construct Storage Hearts, Units, and Access terminals.
+- **Hell Brick** (`magicstorage:hell_brick`): Fire-resistant building brick crafted from nether bricks and magma blocks.
+- **Shadow Diamond** (`magicstorage:shadow_diamond`): Crafted from a Diamond, 2 Obsidian, a Demonite Ingot, and a Crimtane Ingot. Used for Pre-Hardmode remotes.
+- **Radiant Jewel** (`magicstorage:radiant_jewel`): Crafted from a Nether Star, 2 Luminite Bars, Dragon's Breath, and an End Crystal. Used for high-tier upgrades.
+- **Terra Singularity** (`magicstorage:terra_singularity`): End-game catalyst forged from Demonite, Crimtane, Hellstone, Hallowed, Chlorophyte, and Luminite bars combined with a Nether Star, Dragon's Breath, and End Crystal. Used to craft the Tier 8 Terra Storage Unit.
+
+---
+
+## Search and Sorting Syntax
+
+The search bar at the top of the Storage Access and Crafting Access terminals supports real-time text matching and special search prefixes:
+
+- **Plain Text**: Matches any item whose display name contains the query (for example, `iron` matches Iron Ingot, Iron Sword, etc.).
+- **`@mod`**: Filters items by their mod namespace (for example, `@farmersdelight` shows only Farmer's Delight items; `@minecraft` shows vanilla items).
+- **`#tag`**: Filters items by item tags (for example, `#logs` shows all wood logs; `#forge:ingots` shows all ingots).
+
+### Sort Buttons
+- **Sort by Quantity**: Orders items by total count in the network.
+- **Sort by Name**: Orders items alphabetically by display name.
+- **Sort by Mod**: Groups items by mod origin, then alphabetically.
+- **Sort Direction Toggle**: Toggles ascending or descending order.
+
+---
+
+## Third-Party Mod Integrations
+
+All integrations are soft dependencies. If a mod is not present, Modern Magic Storage runs normally without issues:
+
+| Mod | Integration Details |
 | :--- | :--- |
-| **[Farmer's Delight](https://github.com/vectorwing/FarmersDelight)** | Full culinary integration: **Cooking Pot** (1–6 shapeless ingredients with container matching) and **Cutting Board** (input item + tool with durability damage, tool retention in grid, and secondary/chance drops). |
-| **[Apotheosis](https://github.com/Shadows-of-Fire/Apotheosis)** | Crafting station support: **Reforging Table** (re-rolling affix rarities with gem dust and materials), **Salvaging Table** (breaking down gear into scrap materials), and **Gem Cutting Table** (upgrading affix gems). |
-| **[Tetra](https://github.com/mickelus/tetra)** | Crafting station support: **Modular Workbench** (detecting modular tool components and honing materials). |
-| **[Curios API](https://github.com/TheIllusiveC4/Curios)** | Modern replacement for Baubles. Recognizes accessory reforging anvils as valid Heart stations. |
-| **[JEI (Just Enough Items)](https://github.com/mezz/JustEnoughItems)** | Full recipe transfer support (`+`) into Crafting Access for Crafting, Stonecutting, Smithing, Smelting, Blasting, Smoking, Cooking Pot, and Cutting Board, pulling ingredients from network storage and player inventory. |
-| **[Fair Experience](https://github.com/Brilliafy/ModernFairExperience)** | Companion mod. Seamlessly calculates fair raw XP costs for anvil and enchanting station operations. |
-| **[Quality Equipment](https://www.curseforge.com/minecraft/mc-mods/quality-equipment)** | Supports reforging station detection. |
-| **[Reskillable Reimagined](https://www.curseforge.com/minecraft/mc-mods/reskillable-reimagined)** | Validates player skill requirements before allowing access to restricted gear. |
+| **[Just Enough Items (JEI)](https://github.com/mezz/JustEnoughItems)** | Full recipe transfer handler (`+` icon) for Crafting, Stonecutting, Smithing, Smelting, Blasting, Smoking, Farmer's Delight Cooking, and Farmer's Delight Cutting. Pulls items from network storage and player inventory. |
+| **[Farmer's Delight](https://github.com/vectorwing/FarmersDelight)** | Full station integration: Cooking Pot (1 to 6 meal ingredients with container matching) and Cutting Board (input + cutting tool durability damage with secondary drops). |
+| **[Apotheosis](https://github.com/Shadows-of-Fire/Apotheosis)** | Station support for Reforging Table (affix re-rolls), Salvaging Table (scrap breakdown), and Gem Cutting Table (gem upgrades). |
+| **[Tetra](https://github.com/mickelus/tetra)** | Modular Workbench support: detects modular tools, hone progress, and tool components. |
+| **[Curios API](https://github.com/TheIllusiveC4/Curios)** | Accessory reforging anvils are recognized as valid Storage Heart stations. |
+| **[Fair Experience](https://github.com/Brilliafy/ModernFairExperience)** | Calculates fair linear raw XP costs for anvil and enchanting operations. |
+| **[Quality Equipment](https://www.curseforge.com/minecraft/mc-mods/quality-equipment)** | Recognizes reforging stations and anvils. |
+| **[Reskillable Reimagined](https://www.curseforge.com/minecraft/mc-mods/reskillable-reimagined)** | Enforces player skill requirements before allowing interaction with locked items. |
 
 ---
 
-## Local Testing Profile (`debugBuild`)
+## Local Testing and Building
 
-To test new builds locally **without publishing anything to the internet**:
+To build test jars locally without publishing to the internet:
 
-### 1. Build and Collect Testing Jars
-Run the following Gradle command in the project root:
 ```bash
+# Compile and copy all 6 mod jars to debug-jars/
 ./gradlew collectDebugJars
 ```
-*(Or run `./gradlew debugBuild` to execute a full sequential recompile of all target versions first).*
 
-### 2. Grab Your Jars
-The task compiles and copies all 6 playable mod jars directly into the [`debug-jars/`](debug-jars) folder (sources and javadocs are automatically filtered out, and `debug-jars/` is git-ignored):
+Testing jars will be placed into the `debug-jars/` directory:
+- `magicstorage-2.0.0-fabric+1.20.1-SNAPSHOT.jar`
+- `magicstorage-2.0.0-forge+1.20.1-SNAPSHOT.jar`
+- `magicstorage-2.0.0-fabric+1.21.1-SNAPSHOT.jar`
+- `magicstorage-2.0.0-neoforge+1.21.1-SNAPSHOT.jar`
+- `magicstorage-2.0.0-fabric+26.3-SNAPSHOT.jar`
+- `magicstorage-2.0.0-neoforge+26.3-SNAPSHOT.jar`
 
-```
-debug-jars/
-├── magicstorage-2.0.0-fabric+1.20.1-SNAPSHOT.jar
-├── magicstorage-2.0.0-forge+1.20.1-SNAPSHOT.jar
-├── magicstorage-2.0.0-fabric+1.21.1-SNAPSHOT.jar
-├── magicstorage-2.0.0-neoforge+1.21.1-SNAPSHOT.jar
-├── magicstorage-2.0.0-fabric+26.3-SNAPSHOT.jar
-└── magicstorage-2.0.0-neoforge+26.3-SNAPSHOT.jar
-```
-
-Copy the `.jar` for your target version and loader directly into your `.minecraft/mods` directory to test.
-
-> [!TIP]
-> **Sequential Compilation & Low Memory:** Gradle is preconfigured with `org.gradle.parallel=false` and `-Xmx1536M`. Version targets are compiled strictly sequentially so that memory and swap usage remain minimal during builds.
+Copy the jar for your target Minecraft version and loader into your `.minecraft/mods` folder.
 
 ---
 
-## Manual Release & Publishing Automation
+## Wiki Documentation
 
-Publishing to GitHub Releases, Modrinth, and CurseForge is **100% manual**. No commit, local build, or tag push will ever publish to the world automatically.
+For in-depth guides, check the detailed wiki documentation in the [`docs/`](docs/) directory:
 
-### Automated Publishing Workflow (`.github/workflows/release.yml`)
-
-When you are ready to publish an official release:
-
-1. Push your changes to GitHub:
-   ```bash
-   git push origin main
-   ```
-2. Open your repository on GitHub.
-3. Click the **Actions** tab $\rightarrow$ select the **Release** workflow on the left sidebar.
-4. Click **Run workflow** on the right side:
-   - **Branch**: `main`
-   - **Publish to Modrinth & CurseForge**: Checked (`true`)
-5. Click the green **Run workflow** button.
-
-### What Happens During Release:
-- **`git-cliff`** parses conventional commits (`feat:`, `fix:`, `perf:`, etc.) since the previous release and formats [`CHANGELOG.md`](CHANGELOG.md).
-- **`me.modmuss50.mod-publish-plugin`** builds all 6 jars, attaches the generated changelog, and uploads:
-  - To **GitHub Releases** under the version tag (e.g. `v2.0.0`).
-  - To **Modrinth** under Project ID `3SFNKJXS`.
-  - To **CurseForge** under Project ID `1629983`.
+- [Getting Started and Multiblock Mechanics](docs/getting-started.md): Network building, BFS traversal rules, and chunk boundary management.
+- [Blocks and Storage Units](docs/blocks-and-storage-units.md): Technical specs, 8 storage unit tiers, in-place upgrade mechanics, and drop protection.
+- [Crafting Stations and Multi-Station GUI](docs/crafting-stations-and-gui.md): Deep-dive into every supported station, recipes, virtual furnace, and modded block integration.
+- [Remotes, Materials, and Progression](docs/remotes-and-materials.md): Wireless remote binding, ores, world generation, and progression materials.
+- [Third-Party Mod Integrations](docs/mod-integrations.md): JEI recipe transfer, Farmer's Delight, Apotheosis, Tetra, and accessory reforging.
 
 ---
 
-## Configuration & Credentials
-
-The publishing pipeline uses the following settings configured in GitHub repository settings:
-
-### Secrets (`Settings -> Secrets and variables -> Actions -> Secrets`)
-- `PUB_CURSEFORGE_TOKEN`: Your CurseForge API token.
-- `PUB_MODRINTH_TOKEN`: Your Modrinth API token.
-- `GITHUB_TOKEN`: Provided automatically by GitHub Actions.
-
-### Variables (`Settings -> Secrets and variables -> Actions -> Variables`)
-- `PUB_CURSEFORGE_PROJECT_ID`: Default `1629983` (built-in fallback).
-- `PUB_MODRINTH_PROJECT_ID`: Default `3SFNKJXS` (built-in fallback).
-- `PUB_GITHUB_ENABLE`: `true`
-
----
-
-## Credits & License
+## Credits and License
 
 - **[Magic Storage (Terraria)](https://github.com/blushiemagic/MagicStorage)** by blushiemagic: Original game concept and inspiration.
 - **[Jared's MultiLoader-Template](https://github.com/jaredlll08/MultiLoader-Template)**: Multi-platform project scaffolding.
-- **[Stonecutter](https://github.com/kikugie/stonecutter)** by kikugie: Active version controller and preprocessor.
-- **License**: Modern Magic Storage is licensed under the [MIT License](LICENSE).
+- **[Stonecutter](https://github.com/kikugie/stonecutter)** by kikugie: Multi-version active controller and preprocessor.
+- **License**: Modern Magic Storage is licensed under the [MIT License](LICENSE.txt).
