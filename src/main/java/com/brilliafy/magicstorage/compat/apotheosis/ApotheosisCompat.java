@@ -24,6 +24,18 @@ public class ApotheosisCompat {
         return MOD_ID.equals(id.getNamespace()) && (id.getPath().contains("extraction") || id.getPath().equals("extraction_tome"));
     }
 
+    public static boolean isSalvagingStation(ItemStack stack) {
+        if (!isLoaded() || stack.isEmpty()) return false;
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return MOD_ID.equals(id.getNamespace()) && id.getPath().contains("salvag");
+    }
+
+    public static boolean isReforgingStation(ItemStack stack) {
+        if (!isLoaded() || stack.isEmpty()) return false;
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return MOD_ID.equals(id.getNamespace()) && id.getPath().contains("reforg");
+    }
+
     public static boolean isDisenchantingStation(ItemStack stack) {
         return isScrapTome(stack) || isExtractionTome(stack);
     }

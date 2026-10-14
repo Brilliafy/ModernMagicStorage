@@ -4,7 +4,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
@@ -21,6 +20,8 @@ public class StationManager {
     private boolean hasStonecutter;
     private boolean hasLoom;
     private boolean hasCartographyTable;
+    private boolean hasFletchingTable;
+    private boolean hasCauldron;
     private boolean hasCuriosReforger;
     private boolean hasApotheosisScrapTome;
     private boolean hasApotheosisExtractionTome;
@@ -37,6 +38,8 @@ public class StationManager {
         hasStonecutter = false;
         hasLoom = false;
         hasCartographyTable = false;
+        hasFletchingTable = false;
+        hasCauldron = false;
         hasCuriosReforger = false;
         hasApotheosisScrapTome = false;
         hasApotheosisExtractionTome = false;
@@ -65,6 +68,10 @@ public class StationManager {
                 hasLoom = true;
             } else if (stack.is(Items.CARTOGRAPHY_TABLE)) {
                 hasCartographyTable = true;
+            } else if (stack.is(Items.FLETCHING_TABLE)) {
+                hasFletchingTable = true;
+            } else if (stack.is(Items.CAULDRON)) {
+                hasCauldron = true;
             }
 
             ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
@@ -77,7 +84,7 @@ public class StationManager {
                     hasCuriosReforger = true;
                 }
             } else if ("curios".equals(namespace) || "bountifulbaubles".equals(namespace)) {
-                if (path.contains("reforg") || path.contains("anvil")) {
+                if (path.contains("reforg") || path.contains("anvil") || path.contains("token") || path.contains("tablet")) {
                     hasCuriosReforger = true;
                 }
             } else if ("apotheosis".equals(namespace)) {
@@ -86,6 +93,10 @@ public class StationManager {
                 }
                 if (path.contains("extraction") || path.equals("extraction_tome")) {
                     hasApotheosisExtractionTome = true;
+                }
+                if (path.contains("salvag") || path.contains("reforg")) {
+                    hasQualityEquipment = true;
+                    hasCuriosReforger = true;
                 }
             }
         }
@@ -97,7 +108,8 @@ public class StationManager {
                 || stack.is(Items.SMOKER) || stack.is(Items.BREWING_STAND) || stack.is(Items.ANVIL)
                 || stack.is(Items.CHIPPED_ANVIL) || stack.is(Items.DAMAGED_ANVIL) || stack.is(Items.ENCHANTING_TABLE)
                 || stack.is(Items.SMITHING_TABLE) || stack.is(Items.GRINDSTONE) || stack.is(Items.STONECUTTER)
-                || stack.is(Items.LOOM) || stack.is(Items.CARTOGRAPHY_TABLE)) {
+                || stack.is(Items.LOOM) || stack.is(Items.CARTOGRAPHY_TABLE) || stack.is(Items.FLETCHING_TABLE)
+                || stack.is(Items.CAULDRON)) {
             return true;
         }
 
@@ -105,11 +117,11 @@ public class StationManager {
         String namespace = key.getNamespace();
         String path = key.getPath();
 
-        if ("apotheosis".equals(namespace) && (path.contains("scrap") || path.contains("extraction") || path.contains("tome"))) {
+        if ("apotheosis".equals(namespace) && (path.contains("scrap") || path.contains("extraction") || path.contains("tome") || path.contains("salvag") || path.contains("reforg"))) {
             return true;
         }
         if (("curios".equals(namespace) || "bountifulbaubles".equals(namespace) || "qualitytools".equals(namespace) || "quality_equipment".equals(namespace))
-                && (path.contains("reforg") || path.contains("anvil"))) {
+                && (path.contains("reforg") || path.contains("anvil") || path.contains("token") || path.contains("station") || path.contains("tablet"))) {
             return true;
         }
         return false;
@@ -125,6 +137,8 @@ public class StationManager {
     public boolean hasStonecutter() { return hasStonecutter; }
     public boolean hasLoom() { return hasLoom; }
     public boolean hasCartographyTable() { return hasCartographyTable; }
+    public boolean hasFletchingTable() { return hasFletchingTable; }
+    public boolean hasCauldron() { return hasCauldron; }
     public boolean hasCuriosReforger() { return hasCuriosReforger; }
     public boolean hasApotheosisScrapTome() { return hasApotheosisScrapTome; }
     public boolean hasApotheosisExtractionTome() { return hasApotheosisExtractionTome; }

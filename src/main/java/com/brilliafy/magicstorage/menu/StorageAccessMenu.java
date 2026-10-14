@@ -55,11 +55,11 @@ public class StorageAccessMenu extends AbstractContainerMenu {
     private final StringBuilder searchBuffer = new StringBuilder();
 
     public StorageAccessMenu(int containerId, Inventory playerInventory) {
-        this(ModMenus.STORAGE_ACCESS, containerId, playerInventory, null, 4, 8, 20);
+        this(ModMenus.STORAGE_ACCESS, containerId, playerInventory, null, 7, 8, 18);
     }
 
     public StorageAccessMenu(int containerId, Inventory playerInventory, StorageHeartBlockEntity heart) {
-        this(ModMenus.STORAGE_ACCESS, containerId, playerInventory, heart, 4, 8, 20);
+        this(ModMenus.STORAGE_ACCESS, containerId, playerInventory, heart, 7, 8, 18);
     }
 
     protected StorageAccessMenu(MenuType<?> menuType, int containerId, Inventory playerInventory,
@@ -104,11 +104,11 @@ public class StorageAccessMenu extends AbstractContainerMenu {
     protected void addPlayerInventorySlots(Inventory inv) {
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, 140 + row * 18));
+                this.addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, 174 + row * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            this.addSlot(new Slot(inv, col, 8 + col * 18, 198));
+            this.addSlot(new Slot(inv, col, 8 + col * 18, 232));
         }
     }
 

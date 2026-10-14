@@ -135,6 +135,32 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         return stationInventory;
     }
 
+    public boolean addStation(ItemStack stack) {
+        if (!StationManager.isAllowedStation(stack)) return false;
+        for (int i = 0; i < stationInventory.size(); i++) {
+            if (stationInventory.get(i).isEmpty()) {
+                stationInventory.set(i, stack);
+                stationManager.updateStations(stationInventory);
+                setChanged();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public ItemStack removeLastStation() {
+        for (int i = stationInventory.size() - 1; i >= 0; i--) {
+            ItemStack stack = stationInventory.get(i);
+            if (!stack.isEmpty()) {
+                stationInventory.set(i, ItemStack.EMPTY);
+                stationManager.updateStations(stationInventory);
+                setChanged();
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
     public void openNetworkAccess(Player player) {
         player.openMenu(new SimpleMenuProvider(
                 (id, inv, p) -> new StorageAccessMenu(id, inv, this),
@@ -238,6 +264,11 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
     @Override
     public boolean stillValid(Player player) {
         return Container.stillValidBlockEntity(this, player);
+    }
+
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        return StationManager.isAllowedStation(stack);
     }
 
     @Override

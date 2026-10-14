@@ -60,5 +60,9 @@
   "gui.magicstorage.jei_off": "JEI Sync: Disabled",
   "gui.magicstorage.autofill_full": "Autofill: Network & Inventory",
   "gui.magicstorage.autofill_network": "Autofill: Network Only",
-  "gui.magicstorage.autofill_off": "Autofill: Disabled"
+  "gui.magicstorage.autofill_off": "Autofill: Disabled",
+
+  "message.magicstorage.station_inserted": "Installed station: %s",
+  "message.magicstorage.station_removed": "Retrieved station: %s",
+  "message.magicstorage.stations_full": "Station slots are full (max 20)!"
 }

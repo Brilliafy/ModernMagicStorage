@@ -17,17 +17,17 @@ import net.minecraft.world.entity.player.Inventory;
 import java.util.Locale;
 
 public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccessMenu> {
-    private static final ResourceLocation TEXTURE = Constants.id("textures/gui/crafting_interface.png");
+    private static final ResourceLocation TEXTURE = Constants.id("textures/gui/request.png");
     private EditBox searchBox;
 
     //? >= 26.1 {
     /*public CraftingAccessScreen(CraftingAccessMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title, 256, 256);
+        super(menu, playerInventory, title, 206, 256);
     }
     *///?} < 26.1 {
     public CraftingAccessScreen(CraftingAccessMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageWidth = 256;
+        this.imageWidth = 206;
         this.imageHeight = 256;
     }
     //?}
@@ -35,7 +35,7 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
     @Override
     protected void init() {
         super.init();
-        this.searchBox = new EditBox(this.font, this.leftPos + 80, this.topPos + 6, 90, 12,
+        this.searchBox = new EditBox(this.font, this.leftPos + 80, this.topPos + 5, 90, 12,
                 Component.translatable("gui.magicstorage.search"));
         this.searchBox.setMaxLength(32);
         this.searchBox.setResponder(this::sendSearch);

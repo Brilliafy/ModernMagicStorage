@@ -27,16 +27,16 @@ public class CraftingAccessMenu extends StorageAccessMenu {
     }
 
     public CraftingAccessMenu(int containerId, Inventory playerInventory, StorageHeartBlockEntity heart) {
-        super(ModMenus.CRAFTING_ACCESS, containerId, playerInventory, heart, 3, 8, 80);
+        super(ModMenus.CRAFTING_ACCESS, containerId, playerInventory, heart, 4, 8, 18);
         this.level = playerInventory.player.level();
 
-        // Crafting result slot at index 0 of special slots
+        // Crafting result slot at index 0 of special slots (slot index 72)
         this.addSlot(new MagicStorageResultSlot(this, playerInventory.player, craftSlots, resultSlots));
 
-        // 3x3 Crafting grid
+        // 3x3 Crafting grid (slot indices 73..81)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
-                this.addSlot(new Slot(craftSlots, col + row * 3, 30 + col * 18, 17 + row * 18));
+                this.addSlot(new Slot(craftSlots, col + row * 3, 8 + col * 18, 110 + row * 18));
             }
         }
     }
@@ -51,7 +51,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
         public MagicStorageResultSlot(CraftingAccessMenu menu, Player player,
                                       TransientCraftingContainer craftSlots, ResultContainer resultSlots) {
-            super(player, craftSlots, resultSlots, 0, 124, 35);
+            super(player, craftSlots, resultSlots, 0, 101, 128);
             this.menu = menu;
         }
 
@@ -205,6 +205,37 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         }
 
         updateCraftingResult();
+    }
+
+    @Override
+    public ItemStack quickMoveStack(Player player, int index) {
+        if (index == getResultSlotIndex()) {
+            return ItemStack.EMPTY;
+        }
+        if (index >= getPlayerSlotStart() + 37 && index <= getPlayerSlotStart() + 45) {
+            Slot slot = this.slots.get(index);
+            if (slot != null && slot.hasItem()) {
+                ItemStack stack = slot.getItem();
+                ItemStack copy = stack.copy();
+                if (heart != null) {
+                    ItemStack remainder = heart.insertItem(stack);
+                    if (remainder.getCount() != copy.getCount()) {
+                        slot.set(remainder);
+                        slot.setChanged();
+                        slotsChanged(craftSlots);
+                        return copy;
+                    }
+                }
+                if (!player.getInventory().add(stack)) {
+                    return ItemStack.EMPTY;
+                }
+                slot.set(ItemStack.EMPTY);
+                slot.setChanged();
+                slotsChanged(craftSlots);
+                return copy;
+            }
+        }
+        return super.quickMoveStack(player, index);
     }
 
     @Override

@@ -22,20 +22,20 @@ public class StorageAccessScreen extends AbstractContainerScreen<StorageAccessMe
 
     //? >= 26.1 {
     /*public StorageAccessScreen(StorageAccessMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title, 210, 222);
+        super(menu, playerInventory, title, 206, 256);
     }
     *///?} < 26.1 {
     public StorageAccessScreen(StorageAccessMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageWidth = 210;
-        this.imageHeight = 222;
+        this.imageWidth = 206;
+        this.imageHeight = 256;
     }
     //?}
 
     @Override
     protected void init() {
         super.init();
-        this.searchBox = new EditBox(this.font, this.leftPos + 80, this.topPos + 6, 90, 12,
+        this.searchBox = new EditBox(this.font, this.leftPos + 80, this.topPos + 5, 90, 12,
                 Component.translatable("gui.magicstorage.search"));
         this.searchBox.setMaxLength(32);
         this.searchBox.setResponder(this::sendSearch);

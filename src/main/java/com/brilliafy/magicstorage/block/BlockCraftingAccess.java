@@ -2,11 +2,17 @@ package com.brilliafy.magicstorage.block;
 
 import com.brilliafy.magicstorage.Constants;
 import com.brilliafy.magicstorage.blockentity.CraftingAccessBlockEntity;
+import com.brilliafy.magicstorage.blockentity.StorageHeartBlockEntity;
+import com.brilliafy.magicstorage.init.ModBlockEntities;
 import com.brilliafy.magicstorage.storage.NetworkLocator;
+import com.brilliafy.magicstorage.storage.StationManager;
+import com.brilliafy.magicstorage.util.ItemHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -69,6 +75,39 @@ public class BlockCraftingAccess extends BaseEntityBlock {
         if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof CraftingAccessBlockEntity crafting) {
+                if (player.isShiftKeyDown()) {
+                    StorageHeartBlockEntity heart = crafting.getConnectedHeart();
+                    if (heart != null) {
+                        ItemStack held = player.getMainHandItem();
+                        if (StationManager.isAllowedStation(held)) {
+                            ItemStack toInsert = held.copy();
+                            toInsert.setCount(1);
+                            if (heart.addStation(toInsert)) {
+                                held.shrink(1);
+                                ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.station_inserted", toInsert.getHoverName()), true);
+                                return Constants.success(level);
+                            } else {
+                                ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.stations_full"), true);
+                                return Constants.success(level);
+                            }
+                        } else if (held.isEmpty()) {
+                            ItemStack removed = heart.removeLastStation();
+                            if (!removed.isEmpty()) {
+                                if (!player.getInventory().add(removed)) {
+                                    //? >= 26.1 {
+                                    /*if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                                        player.spawnAtLocation(serverLevel, removed);
+                                    }
+                                    *///?} < 26.1 {
+                                    player.drop(removed, false);
+                                    //?}
+                                }
+                                ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.station_removed", removed.getHoverName()), true);
+                                return Constants.success(level);
+                            }
+                        }
+                    }
+                }
                 player.openMenu(crafting);
             }
         }
@@ -80,6 +119,33 @@ public class BlockCraftingAccess extends BaseEntityBlock {
         if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof CraftingAccessBlockEntity crafting) {
+                ItemStack held = player.getItemInHand(hand);
+                if (player.isShiftKeyDown()) {
+                    StorageHeartBlockEntity heart = crafting.getConnectedHeart();
+                    if (heart != null) {
+                        if (StationManager.isAllowedStation(held)) {
+                            ItemStack toInsert = held.copy();
+                            toInsert.setCount(1);
+                            if (heart.addStation(toInsert)) {
+                                held.shrink(1);
+                                ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.station_inserted", toInsert.getHoverName()), true);
+                                return InteractionResult.SUCCESS;
+                            } else {
+                                ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.stations_full"), true);
+                                return InteractionResult.CONSUME;
+                            }
+                        } else if (held.isEmpty()) {
+                            ItemStack removed = heart.removeLastStation();
+                            if (!removed.isEmpty()) {
+                                if (!player.getInventory().add(removed)) {
+                                    player.drop(removed, false);
+                                }
+                                ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.station_removed", removed.getHoverName()), true);
+                                return InteractionResult.SUCCESS;
+                            }
+                        }
+                    }
+                }
                 player.openMenu(crafting);
             }
         }
