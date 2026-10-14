@@ -211,7 +211,7 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
     private boolean handleCustomClick(double mouseX, double mouseY, int button, boolean isShift) {
         int panelX = this.leftPos + this.imageWidth + 4;
         int panelY = this.topPos + 10;
-        if (mouseX >= panelX && mouseX <= panelX + 32 && mouseY >= panelY && mouseY <= panelY + 160) {
+        if (mouseX >= panelX && mouseX <= panelX + 32 && mouseY >= panelY + 4 && mouseY < panelY + 4 + 6 * 25) {
             List<StationEntry> stations = getInstalledStations();
             int clickedSlot = (int) ((mouseY - (panelY + 4)) / 25);
             int idx = clickedSlot + this.stationScrollOffset;
@@ -476,7 +476,7 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
         // Tooltips for stations on right panel
         int panelX = this.leftPos + this.imageWidth + 4;
         int panelY = this.topPos + 10;
-        if (mouseX >= panelX && mouseX <= panelX + 32 && mouseY >= panelY && mouseY <= panelY + 160) {
+        if (mouseX >= panelX && mouseX <= panelX + 32 && mouseY >= panelY + 4 && mouseY < panelY + 4 + 6 * 25) {
             List<StationEntry> stations = getInstalledStations();
             int clickedSlot = (int) ((mouseY - (panelY + 4)) / 25);
             int idx = clickedSlot + this.stationScrollOffset;
@@ -713,7 +713,7 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
         // Tooltips for stations on right panel
         int panelX = this.leftPos + this.imageWidth + 4;
         int panelY = this.topPos + 10;
-        if (mouseX >= panelX && mouseX <= panelX + 32 && mouseY >= panelY && mouseY <= panelY + 160) {
+        if (mouseX >= panelX && mouseX <= panelX + 32 && mouseY >= panelY + 4 && mouseY < panelY + 4 + 6 * 25) {
             List<StationEntry> stations = getInstalledStations();
             int clickedSlot = (int) ((mouseY - (panelY + 4)) / 25);
             int idx = clickedSlot + this.stationScrollOffset;

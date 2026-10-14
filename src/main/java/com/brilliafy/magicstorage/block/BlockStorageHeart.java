@@ -132,7 +132,17 @@ public class BlockStorageHeart extends BaseEntityBlock {
         return createTickerHelper(blockEntityType, ModBlockEntities.STORAGE_HEART, StorageHeartBlockEntity::tick);
     }
 
-    //? < 26.1 {
+    //? >= 26.1 {
+    /*@Override
+    protected void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof StorageHeartBlockEntity heart) {
+            net.minecraft.world.Containers.dropContents(level, pos, heart);
+        }
+        com.brilliafy.magicstorage.storage.NetworkLocator.markNetworkDirty(level, pos);
+    }
+    *///?} < 26.1 {
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
@@ -140,6 +150,7 @@ public class BlockStorageHeart extends BaseEntityBlock {
             if (be instanceof StorageHeartBlockEntity heart) {
                 net.minecraft.world.Containers.dropContents(level, pos, heart);
             }
+            com.brilliafy.magicstorage.storage.NetworkLocator.markNetworkDirty(level, pos);
         }
         super.onRemove(state, level, pos, newState, isMoving);
     }

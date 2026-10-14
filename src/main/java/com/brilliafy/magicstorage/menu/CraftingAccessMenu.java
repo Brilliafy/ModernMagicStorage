@@ -17,7 +17,9 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 //? > 1.20.1 {
@@ -240,12 +242,12 @@ public class CraftingAccessMenu extends StorageAccessMenu {
                 if (block instanceof net.minecraft.world.MenuProvider mp) {
                     provider = mp;
                 } else {
-                    provider = block.defaultBlockState().getMenuProvider(level, heart != null ? heart.getBlockPos() : player.blockPosition());
+                    provider = block.defaultBlockState().getMenuProvider(level, player.blockPosition());
                 }
                 if (provider == null && block instanceof net.minecraft.world.level.block.EntityBlock entityBlock) {
                     try {
                         net.minecraft.world.level.block.entity.BlockEntity be = entityBlock.newBlockEntity(
-                                heart != null ? heart.getBlockPos() : player.blockPosition(), block.defaultBlockState()
+                                player.blockPosition(), block.defaultBlockState()
                         );
                         if (be instanceof net.minecraft.world.MenuProvider mp) {
                             provider = mp;
@@ -307,7 +309,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
         @Override
         public boolean isActive() {
-            return menu.getActiveMode() == StationMode.CRAFTING;
+            return menu.getActiveMode() == StationMode.CRAFTING || menu.getActiveMode() == StationMode.MODDED;
         }
     }
 
@@ -361,7 +363,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
         @Override
         public boolean isActive() {
-            return menu.getActiveMode() == StationMode.CRAFTING;
+            return menu.getActiveMode() == StationMode.CRAFTING || menu.getActiveMode() == StationMode.MODDED;
         }
 
         @Override
@@ -395,19 +397,19 @@ public class CraftingAccessMenu extends StorageAccessMenu {
     }
 
     public void handleResultTake(Player player, ItemStack stack) {
-        ItemStack patternBackup = ItemStack.EMPTY;
-        int patternSlot = -1;
+        Map<Integer, ItemStack> reusableBackups = new HashMap<>();
         boolean isCuttingTool = false;
         ItemStack cutItem = ItemStack.EMPTY;
         ItemStack toolItem = ItemStack.EMPTY;
+        int cuttingToolSlot = -1;
 
         for (int i = 0; i < craftSlots.getContainerSize(); i++) {
             if (StationRecipeManager.isReusableIngredient(craftSlots, i, level)) {
-                patternSlot = i;
-                patternBackup = craftSlots.getItem(i).copy();
+                reusableBackups.put(i, craftSlots.getItem(i).copy());
                 if (FarmersDelightCompat.isCuttingToolSlot(craftSlots, i, level)) {
                     isCuttingTool = true;
-                    toolItem = patternBackup;
+                    toolItem = craftSlots.getItem(i).copy();
+                    cuttingToolSlot = i;
                     for (int j = 0; j < craftSlots.getContainerSize(); j++) {
                         if (j != i && !craftSlots.getItem(j).isEmpty()) {
                             cutItem = craftSlots.getItem(j).copy();
@@ -415,21 +417,24 @@ public class CraftingAccessMenu extends StorageAccessMenu {
                         }
                     }
                 }
-                break;
             }
         }
 
-        if (patternSlot != -1 && !patternBackup.isEmpty()) {
-            if (isCuttingTool && patternBackup.isDamageableItem()) {
-                int newDmg = patternBackup.getDamageValue() + 1;
-                if (newDmg < patternBackup.getMaxDamage()) {
-                    patternBackup.setDamageValue(newDmg);
-                    craftSlots.setItem(patternSlot, patternBackup);
+        for (Map.Entry<Integer, ItemStack> entry : reusableBackups.entrySet()) {
+            int slot = entry.getKey();
+            ItemStack backup = entry.getValue();
+            if (!backup.isEmpty()) {
+                if (isCuttingTool && slot == cuttingToolSlot && backup.isDamageableItem()) {
+                    int newDmg = backup.getDamageValue() + 1;
+                    if (newDmg < backup.getMaxDamage()) {
+                        backup.setDamageValue(newDmg);
+                        craftSlots.setItem(slot, backup);
+                    } else {
+                        craftSlots.setItem(slot, ItemStack.EMPTY);
+                    }
                 } else {
-                    craftSlots.setItem(patternSlot, ItemStack.EMPTY);
+                    craftSlots.setItem(slot, backup);
                 }
-            } else {
-                craftSlots.setItem(patternSlot, patternBackup);
             }
         }
 
@@ -493,7 +498,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
     }
 
     protected void updateCraftingResult() {
-        if (activeMode != StationMode.CRAFTING) {
+        if (activeMode != StationMode.CRAFTING && activeMode != StationMode.MODDED) {
             ItemStack stationRes = StationRecipeManager.computeStationResultForMode(
                     activeMode, craftSlots, level, heart != null ? heart.getStationManager() : null, player, selectedRecipeIndex
             );
@@ -501,20 +506,20 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             return;
         }
 
-        if (isGrindstoneRepairInput()) {
-            ItemStack stationResult = StationRecipeManager.computeStationResult(
-                craftSlots, level, heart != null ? heart.getStationManager() : null, player
-            );
-            resultSlots.setItem(0, stationResult);
-            return;
-        }
-
         //? >= 26.1 {
         /*CraftingInput input = craftSlots.asCraftInput();
         Optional<RecipeHolder<CraftingRecipe>> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
         if (match.isPresent()) {
-            ItemStack result = match.get().value().assemble(input);
-            resultSlots.setItem(0, result);
+            CraftingRecipe recipe = match.get().value();
+            if (recipe instanceof RepairItemRecipe && isGrindstoneRepairInput()) {
+                ItemStack stationResult = StationRecipeManager.computeStationResult(
+                    craftSlots, level, heart != null ? heart.getStationManager() : null, player
+                );
+                resultSlots.setItem(0, stationResult);
+            } else {
+                ItemStack result = recipe.assemble(input);
+                resultSlots.setItem(0, result);
+            }
         } else {
             ItemStack stationResult = StationRecipeManager.computeStationResult(
                 craftSlots, level, heart != null ? heart.getStationManager() : null, player
@@ -525,8 +530,16 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         CraftingInput input = craftSlots.asCraftInput();
         Optional<RecipeHolder<CraftingRecipe>> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
         if (match.isPresent()) {
-            ItemStack result = match.get().value().assemble(input, level.registryAccess());
-            resultSlots.setItem(0, result);
+            CraftingRecipe recipe = match.get().value();
+            if (recipe instanceof RepairItemRecipe && isGrindstoneRepairInput()) {
+                ItemStack stationResult = StationRecipeManager.computeStationResult(
+                    craftSlots, level, heart != null ? heart.getStationManager() : null, player
+                );
+                resultSlots.setItem(0, stationResult);
+            } else {
+                ItemStack result = recipe.assemble(input, level.registryAccess());
+                resultSlots.setItem(0, result);
+            }
         } else {
             ItemStack stationResult = StationRecipeManager.computeStationResult(
                 craftSlots, level, heart != null ? heart.getStationManager() : null, player
@@ -536,8 +549,16 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         //?} <= 1.20.1 {
         /*Optional<CraftingRecipe> match = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftSlots, level);
         if (match.isPresent()) {
-            ItemStack result = match.get().assemble(craftSlots, level.registryAccess());
-            resultSlots.setItem(0, result);
+            CraftingRecipe recipe = match.get();
+            if (recipe instanceof RepairItemRecipe && isGrindstoneRepairInput()) {
+                ItemStack stationResult = StationRecipeManager.computeStationResult(
+                    craftSlots, level, heart != null ? heart.getStationManager() : null, player
+                );
+                resultSlots.setItem(0, stationResult);
+            } else {
+                ItemStack result = recipe.assemble(craftSlots, level.registryAccess());
+                resultSlots.setItem(0, result);
+            }
         } else {
             ItemStack stationResult = StationRecipeManager.computeStationResult(
                 craftSlots, level, heart != null ? heart.getStationManager() : null, player
@@ -642,13 +663,35 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
         for (int i = 0; i < craftSlots.getContainerSize(); i++) {
             ItemStack inGrid = craftSlots.getItem(i);
-            if (!inGrid.isEmpty() && FarmersDelightCompat.isCuttingToolSlot(craftSlots, i, level) && inGrid.isDamageableItem()) {
+            if (!inGrid.isEmpty() && FarmersDelightCompat.isCuttingToolSlot(craftSlots, i, level)) {
                 int craftsDone = singleResult.getCount() > 0 ? craftedCount / singleResult.getCount() : 0;
-                int newDmg = inGrid.getDamageValue() + craftsDone;
-                if (newDmg < inGrid.getMaxDamage()) {
-                    inGrid.setDamageValue(newDmg);
-                } else {
-                    craftSlots.setItem(i, ItemStack.EMPTY);
+                if (craftsDone > 0) {
+                    ItemStack tool = inGrid.copy();
+                    ItemStack cutItem = ItemStack.EMPTY;
+                    for (int j = 0; j < craftSlots.getContainerSize(); j++) {
+                        if (j != i && !craftSlots.getItem(j).isEmpty()) {
+                            cutItem = craftSlots.getItem(j).copy();
+                            break;
+                        }
+                    }
+                    if (!cutItem.isEmpty()) {
+                        List<ItemStack> secondary = FarmersDelightCompat.getSecondaryCuttingResults(cutItem, tool, level);
+                        for (ItemStack sec : secondary) {
+                            ItemStack extra = sec.copy();
+                            extra.setCount(sec.getCount() * craftsDone);
+                            if (!player.getInventory().add(extra)) {
+                                ItemHelper.dropItem(player, extra);
+                            }
+                        }
+                    }
+                }
+                if (inGrid.isDamageableItem()) {
+                    int newDmg = inGrid.getDamageValue() + craftsDone;
+                    if (newDmg < inGrid.getMaxDamage()) {
+                        inGrid.setDamageValue(newDmg);
+                    } else {
+                        craftSlots.setItem(i, ItemStack.EMPTY);
+                    }
                 }
                 break;
             }
@@ -765,7 +808,10 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
     @Override
     public void removed(Player player) {
-        super.removed(player);
+        if (!getCarried().isEmpty() && heart != null) {
+            setCarried(heart.insertItem(getCarried()));
+        }
         safeClearContainer(player, this.craftSlots);
+        super.removed(player);
     }
 }

@@ -254,11 +254,18 @@ public class StationRecipeManager {
     public static boolean isReusableIngredient(TransientCraftingContainer craftSlots, int slot, Level level) {
         if (slot < 0 || slot >= craftSlots.getContainerSize()) return false;
         ItemStack item = craftSlots.getItem(slot);
+        if (item.isEmpty()) return false;
         if (isReusablePattern(item)) return true;
-        if (slot == 1 && craftSlots.getContainerSize() > 1) {
-            ItemStack s0 = craftSlots.getItem(0);
-            if (!s0.isEmpty() && !item.isEmpty() && level != null) {
-                if (!getStonecutterMatchingVariant(s0, item, level).isEmpty()) {
+
+        List<Integer> filledSlots = new ArrayList<>();
+        for (int i = 0; i < craftSlots.getContainerSize(); i++) {
+            if (!craftSlots.getItem(i).isEmpty()) filledSlots.add(i);
+        }
+        if (filledSlots.size() == 2 && filledSlots.contains(slot)) {
+            int otherSlot = filledSlots.get(0) == slot ? filledSlots.get(1) : filledSlots.get(0);
+            ItemStack otherItem = craftSlots.getItem(otherSlot);
+            if (!otherItem.isEmpty() && level != null) {
+                if (!getStonecutterMatchingVariant(otherItem, item, level).isEmpty()) {
                     return true;
                 }
             }

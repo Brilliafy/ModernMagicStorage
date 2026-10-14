@@ -90,6 +90,9 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
             for (Direction dir : Direction.values()) {
                 BlockPos neighbor = current.relative(dir);
                 if (visited.add(neighbor)) {
+                    if (!level.isLoaded(neighbor) && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                        serverLevel.getChunk(neighbor.getX() >> 4, neighbor.getZ() >> 4);
+                    }
                     BlockState neighborState = level.getBlockState(neighbor);
                     if (neighborState.getBlock() instanceof BlockStorageUnit) {
                         connectedUnits.add(neighbor);
@@ -370,6 +373,9 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         if (level == null) return units;
 
         for (BlockPos pos : connectedUnits) {
+            if (!level.isLoaded(pos) && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                serverLevel.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
+            }
             if (level.isLoaded(pos)) {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof StorageUnitBlockEntity unit && !unit.isRemoved()) {
@@ -577,7 +583,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
 
     @Override
     public void clearContent() {
-        stationInventory.clear();
+        Collections.fill(stationInventory, ItemStack.EMPTY);
         stationManager.updateStations(stationInventory.subList(0, StationManager.STATION_SLOTS));
         setChanged();
     }

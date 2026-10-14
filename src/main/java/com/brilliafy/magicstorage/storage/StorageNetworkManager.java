@@ -108,9 +108,15 @@ public class StorageNetworkManager {
         if (stack.isEmpty()) return ItemStack.EMPTY;
         ItemStack remaining = stack.copy();
 
-        // 1. First pass: try merging into existing stacks
+        // 1. First pass: merge into existing partial stacks across all units
         for (StorageUnitBlockEntity unit : units) {
-            remaining = unit.insertStack(remaining);
+            remaining = unit.insertStackMergeOnly(remaining);
+            if (remaining.isEmpty()) return ItemStack.EMPTY;
+        }
+
+        // 2. Second pass: put into empty slots across all units
+        for (StorageUnitBlockEntity unit : units) {
+            remaining = unit.insertStackEmptyOnly(remaining);
             if (remaining.isEmpty()) return ItemStack.EMPTY;
         }
 

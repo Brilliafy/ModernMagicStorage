@@ -85,9 +85,8 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
         return count;
     }
 
-    public ItemStack insertStack(ItemStack toInsert) {
+    public ItemStack insertStackMergeOnly(ItemStack toInsert) {
         if (toInsert.isEmpty()) return ItemStack.EMPTY;
-        // 1. Try to merge with existing stacks
         for (int i = 0; i < items.size(); i++) {
             ItemStack current = items.get(i);
             if (!current.isEmpty() && com.brilliafy.magicstorage.util.ItemHelper.canMerge(current, toInsert)) {
@@ -102,7 +101,11 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
                 }
             }
         }
-        // 2. Put into empty slot
+        return toInsert;
+    }
+
+    public ItemStack insertStackEmptyOnly(ItemStack toInsert) {
+        if (toInsert.isEmpty()) return ItemStack.EMPTY;
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i).isEmpty()) {
                 items.set(i, toInsert.copy());
@@ -112,6 +115,12 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
             }
         }
         return toInsert;
+    }
+
+    public ItemStack insertStack(ItemStack toInsert) {
+        ItemStack remaining = insertStackMergeOnly(toInsert);
+        if (remaining.isEmpty()) return ItemStack.EMPTY;
+        return insertStackEmptyOnly(remaining);
     }
 
     public ItemStack extractStack(ItemStack template, int maxCount) {
@@ -232,7 +241,7 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
 
     @Override
     public void clearContent() {
-        items.clear();
+        java.util.Collections.fill(items, ItemStack.EMPTY);
         setChanged();
     }
 
