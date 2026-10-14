@@ -406,6 +406,18 @@ public class StationRecipeManager {
         return ItemStack.EMPTY;
     }
 
+    public static List<ItemStack> getStonecutterVariants(ItemStack input, Level level) {
+        List<ItemStack> list = new ArrayList<>();
+        if (input.isEmpty() || level == null) return list;
+        SingleRecipeInput sri = new SingleRecipeInput(input);
+        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+            if (holder.value() instanceof StonecutterRecipe sr && sr.matches(sri, level)) {
+                list.add(sr.assemble(sri));
+            }
+        }
+        return list;
+    }
+
     private static ItemStack getStonecutterMatchingVariant(ItemStack input, ItemStack sample, Level level) {
         SingleRecipeInput sri = new SingleRecipeInput(input);
         for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
@@ -472,6 +484,18 @@ public class StationRecipeManager {
             return match.get().value().assemble(input, level.registryAccess());
         }
         return ItemStack.EMPTY;
+    }
+
+    public static List<ItemStack> getStonecutterVariants(ItemStack input, Level level) {
+        List<ItemStack> list = new ArrayList<>();
+        if (input.isEmpty() || level == null) return list;
+        SingleRecipeInput sri = new SingleRecipeInput(input);
+        for (RecipeHolder<StonecutterRecipe> holder : level.getRecipeManager().getAllRecipesFor(RecipeType.STONECUTTING)) {
+            if (holder.value().matches(sri, level)) {
+                list.add(holder.value().assemble(sri, level.registryAccess()));
+            }
+        }
+        return list;
     }
 
     private static ItemStack getStonecutterMatchingVariant(ItemStack input, ItemStack sample, Level level) {
@@ -607,6 +631,18 @@ public class StationRecipeManager {
         return ItemStack.EMPTY;
     }
 
+    public static List<ItemStack> getStonecutterVariants(ItemStack input, Level level) {
+        List<ItemStack> list = new ArrayList<>();
+        if (input.isEmpty() || level == null) return list;
+        Container container = new SimpleContainer(input);
+        for (StonecutterRecipe recipe : level.getRecipeManager().getAllRecipesFor(RecipeType.STONECUTTING)) {
+            if (recipe.matches(container, level)) {
+                list.add(recipe.assemble(container, level.registryAccess()));
+            }
+        }
+        return list;
+    }
+
     private static ItemStack getStonecutterMatchingVariant(ItemStack input, ItemStack sample, Level level) {
         Container container = new SimpleContainer(input);
         var recipes = level.getRecipeManager().getAllRecipesFor(RecipeType.STONECUTTING);
@@ -621,4 +657,116 @@ public class StationRecipeManager {
         return ItemStack.EMPTY;
     }
     *///?}
+
+    public static class SmeltResult {
+        private final ItemStack result;
+        private final int cookTime;
+        private final int speed;
+
+        public SmeltResult(ItemStack result, int cookTime, int speed) {
+            this.result = result;
+            this.cookTime = cookTime;
+            this.speed = speed;
+        }
+
+        public ItemStack getResult() { return result; }
+        public int getCookTime() { return cookTime; }
+        public int getSpeed() { return speed; }
+    }
+
+    public static SmeltResult getSmeltResult(ItemStack input, Level level, boolean hasBlast, boolean hasSmoker, boolean hasFurnace) {
+        if (input.isEmpty() || level == null) return null;
+        if (hasSmoker && hasRecipe(input, RecipeType.SMOKING, level)) {
+            ItemStack res = getSingleItemResult(input, RecipeType.SMOKING, level);
+            if (!res.isEmpty()) return new SmeltResult(res, 100, 1);
+        }
+        if (hasBlast && hasRecipe(input, RecipeType.BLASTING, level)) {
+            ItemStack res = getSingleItemResult(input, RecipeType.BLASTING, level);
+            if (!res.isEmpty()) return new SmeltResult(res, 100, 1);
+        }
+        if (hasFurnace && hasRecipe(input, RecipeType.SMELTING, level)) {
+            ItemStack res = getSingleItemResult(input, RecipeType.SMELTING, level);
+            if (!res.isEmpty()) return new SmeltResult(res, 200, 1);
+        }
+        return null;
+    }
+
+    public static int getFuelBurnTime(ItemStack stack, Level level) {
+        if (stack.isEmpty()) return 0;
+        if (stack.is(Items.LAVA_BUCKET)) return 20000;
+        if (stack.is(Items.COAL_BLOCK)) return 16000;
+        if (stack.is(Items.BLAZE_ROD)) return 2400;
+        if (stack.is(Items.COAL) || stack.is(Items.CHARCOAL)) return 1600;
+        try {
+            java.lang.reflect.Method m = net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity.class.getDeclaredMethod("getFuel");
+            m.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            java.util.Map<Item, Integer> fuels = (java.util.Map<Item, Integer>) m.invoke(null);
+            if (fuels != null && fuels.containsKey(stack.getItem())) {
+                return fuels.get(stack.getItem());
+            }
+        } catch (Throwable ignored) {}
+        if (stack.is(net.minecraft.tags.ItemTags.LOGS) || stack.is(net.minecraft.tags.ItemTags.PLANKS)) return 300;
+        if (stack.is(Items.STICK)) return 100;
+        return 0;
+    }
+
+    public static ItemStack computeStationResultForMode(StationMode mode, TransientCraftingContainer craftSlots, Level level, StationManager stations, Player player, int selectedVariantIndex) {
+        if (mode == null || mode == StationMode.CRAFTING) {
+            return computeStationResult(craftSlots, level, stations, player);
+        }
+        if (mode == StationMode.STONECUTTER) {
+            ItemStack in = craftSlots.getItem(0);
+            if (in.isEmpty()) return ItemStack.EMPTY;
+            List<ItemStack> variants = getStonecutterVariants(in, level);
+            if (variants.isEmpty()) return ItemStack.EMPTY;
+            if (selectedVariantIndex >= 0 && selectedVariantIndex < variants.size()) {
+                return variants.get(selectedVariantIndex).copy();
+            }
+            return variants.get(0).copy();
+        }
+        if (mode == StationMode.SMITHING) {
+            return getSmithingResult(craftSlots.getItem(0), craftSlots.getItem(1), craftSlots.getItem(2), level);
+        }
+        if (mode == StationMode.GRINDSTONE) {
+            ItemStack s0 = craftSlots.getItem(0);
+            ItemStack s1 = craftSlots.getItem(1);
+            if (!s0.isEmpty() && s1.isEmpty() && hasNonCurseEnchantments(s0)) {
+                return removeNonCursesFrom(s0);
+            }
+            if (s0.isEmpty() && !s1.isEmpty() && hasNonCurseEnchantments(s1)) {
+                return removeNonCursesFrom(s1);
+            }
+            if (!s0.isEmpty() && !s1.isEmpty() && s0.is(s1.getItem()) && s0.isDamageableItem()) {
+                int maxDmg = s0.getMaxDamage();
+                int rem0 = maxDmg - s0.getDamageValue();
+                int rem1 = maxDmg - s1.getDamageValue();
+                int bonus = maxDmg * 5 / 100;
+                int combinedRem = Math.min(maxDmg, rem0 + rem1 + bonus);
+                ItemStack res = s0.copy();
+                res.setDamageValue(Math.max(0, maxDmg - combinedRem));
+                return res;
+            }
+            return ItemStack.EMPTY;
+        }
+        if (mode == StationMode.LOOM) {
+            return getLoomResult(craftSlots.getItem(0), craftSlots.getItem(1), craftSlots.getItem(2), level);
+        }
+        if (mode == StationMode.CARTOGRAPHY) {
+            return getCartographyResult(craftSlots.getItem(0), craftSlots.getItem(1), level);
+        }
+        if (mode == StationMode.FD_COOKING) {
+            List<ItemStack> nonNull = new ArrayList<>();
+            for (int i = 0; i < craftSlots.getContainerSize(); i++) {
+                ItemStack s = craftSlots.getItem(i);
+                if (!s.isEmpty()) nonNull.add(s);
+            }
+            return FarmersDelightCompat.computeCookingPotResult(nonNull, level);
+        }
+        if (mode == StationMode.FD_CUTTING) {
+            return FarmersDelightCompat.computeCuttingResult(craftSlots.getItem(0), craftSlots.getItem(1), level);
+        }
+        return computeStationResult(craftSlots, level, stations, player);
+    }
 }
+

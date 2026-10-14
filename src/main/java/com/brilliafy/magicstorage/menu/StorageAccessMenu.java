@@ -120,6 +120,10 @@ public class StorageAccessMenu extends AbstractContainerMenu {
         return displaySlots;
     }
 
+    public SimpleContainer getDisplay() {
+        return display;
+    }
+
     public int getPage() {
         return page;
     }

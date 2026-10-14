@@ -38,12 +38,18 @@ Modern Magic Storage is built on **Jared's MultiLoader-Template** architecture, 
 - **Unified Terminals**:
   - **Storage Access**: Search, sort, deposit, and extract network items.
   - **Crafting Access**: 3x3 crafting matrix connected directly to network inventory with instant shift-click crafting.
+- **Interactive Multi-Station GUI**:
+  - **Right Station Selection Panel**: Displays 1:1 icons of all crafting stations currently installed in the Storage Heart with a responsive scrollbar. Clicking any icon instantly adapts the terminal into that station's interface (Crafting Table, Furnace, Stonecutter, Smithing Table, etc.).
+  - **Left Storage Network Overlay**: A live 3-column scrollable viewport into network items directly embedded on the left side of every station interface. Click items to withdraw stacks or single units into inventory/cursor, or click the panel with carried items to deposit them directly back into network storage.
+  - **Virtual Server-Side Furnace**: When a furnace station is installed, the Storage Heart contains a dedicated persistent virtual furnace ticking continuously on the server. Smelting and fuel burn progress continue even when players close the terminal or leave the area. Supports standard furnace fuels, recipe cook times, and container remainders (e.g. empty buckets from lava).
+  - **Zero Item Loss / Safe Ejection**: Closing the Crafting Access GUI or switching between station tabs automatically returns transient ingredients into network storage or the player's inventory—items are never deleted or voided.
+  - **Procedural UI Textures**: Custom GUI borders, bevels, station slots, progress arrows, flames, and scrollbar tracks are generated with Python Pillow (`station_panel.png`, `storage_overlay.png`, `station_widgets.png`).
 - **Supported Stations & In-Terminal Recipes**:
   - **Crafting Table**: Standard 3x3 shaping recipes.
   - **Grindstone**: 2-item tool repair (combines durability with 5% max-damage bonus, preserves curses, strips non-curses) and 1-item disenchanting (resets repair cost, removes non-curses, converts enchanted book to standard book). Explicitly prioritized over vanilla un-enchanted repair to prevent recipe conflicts.
-  - **Stonecutter**: 1-item precision block cutting directly in the grid. Dual-purpose blocks (e.g. Cobblestone, Stone) resolve to Smelting in slot 0 (top-left) and Stonecutting in slot 4 (center). Exact variant selection is supported by placing the input block in slot 0 and a sample target in slot 1 (the sample template is preserved and not consumed).
+  - **Stonecutter**: 1-item precision block cutting directly in the grid. Dual-purpose blocks (e.g. Cobblestone, Stone) resolve to Smelting in slot 0 (top-left) and Stonecutting in slot 4 (center). Exact variant selection is supported by placing the input block in slot 0 and a sample target in slot 1 (the sample template is preserved and not consumed). In Stonecutter mode, clickable recipe variant buttons appear directly in the interface.
   - **Smithing Table**: 3-item upgrades (Template + Base + Addition) with automatic permutation matching.
-  - **Furnace / Blast Furnace / Smoker**: Smelting, blasting, and smoking recipes directly in the grid when the corresponding furnace stations are installed in the Heart.
+  - **Furnace / Blast Furnace / Smoker**: Smelting, blasting, and smoking recipes directly in the grid when the corresponding furnace stations are installed in the Heart, plus continuous background smelting via the virtual furnace.
   - **Cartography Table**: Map zooming (+Paper), map locking (+Glass Pane), and map cloning (+Empty Map).
   - **Loom**: Banner pattern crafting (Banner + Dye + optional Pattern item). Banner pattern items are reusable and preserved in the grid.
   - **Farmer's Delight Stations**:
