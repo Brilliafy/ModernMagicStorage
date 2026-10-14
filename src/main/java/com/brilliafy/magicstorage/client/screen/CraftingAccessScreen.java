@@ -1,7 +1,9 @@
 package com.brilliafy.magicstorage.client.screen;
 
 import com.brilliafy.magicstorage.Constants;
+import com.brilliafy.magicstorage.compat.apotheosis.ApotheosisCompat;
 import com.brilliafy.magicstorage.compat.farmersdelight.FarmersDelightCompat;
+import com.brilliafy.magicstorage.compat.tetra.TetraCompat;
 import com.brilliafy.magicstorage.menu.CraftingAccessMenu;
 import com.brilliafy.magicstorage.storage.StationMode;
 import com.brilliafy.magicstorage.storage.StationRecipeManager;
@@ -88,6 +90,10 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
         boolean hasAnvil = false;
         boolean hasCookingPot = false;
         boolean hasCuttingBoard = false;
+        boolean hasReforging = false;
+        boolean hasSalvaging = false;
+        boolean hasGemCutting = false;
+        boolean hasTetra = false;
 
         for (int i = 0; i < this.menu.getStationContainer().getContainerSize(); i++) {
             ItemStack s = this.menu.getStationContainer().getItem(i);
@@ -120,6 +126,18 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
             } else if (!hasCuttingBoard && FarmersDelightCompat.isCuttingBoard(s)) {
                 hasCuttingBoard = true;
                 list.add(new StationEntry(StationMode.FD_CUTTING, s, Component.literal("Cutting Board")));
+            } else if (!hasReforging && ApotheosisCompat.isReforgingTable(s)) {
+                hasReforging = true;
+                list.add(new StationEntry(StationMode.APOTH_REFORGING, s, Component.literal("Reforging Table")));
+            } else if (!hasSalvaging && ApotheosisCompat.isSalvagingTable(s)) {
+                hasSalvaging = true;
+                list.add(new StationEntry(StationMode.APOTH_SALVAGING, s, Component.literal("Salvaging Table")));
+            } else if (!hasGemCutting && ApotheosisCompat.isGemCuttingTable(s)) {
+                hasGemCutting = true;
+                list.add(new StationEntry(StationMode.APOTH_GEM_CUTTING, s, Component.literal("Gem Cutting Table")));
+            } else if (!hasTetra && TetraCompat.isModularWorkbench(s)) {
+                hasTetra = true;
+                list.add(new StationEntry(StationMode.TETRA_WORKBENCH, s, Component.literal("Modular Workbench")));
             }
         }
         return list;
@@ -318,6 +336,40 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
                 graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 65, this.topPos + 129, 190.0f, 0.0f, 18, 18, 256, 256);
                 graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 123, this.topPos + 129, 190.0f, 0.0f, 18, 18, 256, 256);
                 graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 92, this.topPos + 130, 40.0f, 70.0f, 24, 17, 256, 256);
+            } else if (mode == StationMode.GRINDSTONE || mode == StationMode.CARTOGRAPHY) {
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 34, this.topPos + 119, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 34, this.topPos + 141, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 67, this.topPos + 131, 40.0f, 70.0f, 24, 17, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 104, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+            } else if (mode == StationMode.ANVIL || mode == StationMode.FD_CUTTING || mode == StationMode.TETRA_WORKBENCH) {
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 34, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 64, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 91, this.topPos + 131, 40.0f, 70.0f, 24, 17, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 122, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+            } else if (mode == StationMode.LOOM) {
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 24, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 48, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 72, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 96, this.topPos + 131, 40.0f, 70.0f, 24, 17, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 124, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+            } else if (mode == StationMode.FD_COOKING) {
+                for (int c = 0; c < 3; c++) {
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 24 + c * 20, this.topPos + 117, 190.0f, 0.0f, 18, 18, 256, 256);
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 24 + c * 20, this.topPos + 137, 190.0f, 0.0f, 18, 18, 256, 256);
+                }
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 93, this.topPos + 147, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 92, this.topPos + 126, 40.0f, 70.0f, 24, 17, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 123, this.topPos + 125, 190.0f, 0.0f, 18, 18, 256, 256);
+            } else if (mode == StationMode.APOTH_REFORGING || mode == StationMode.APOTH_GEM_CUTTING) {
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 34, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 59, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 84, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 104, this.topPos + 131, 40.0f, 70.0f, 24, 17, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 127, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+            } else if (mode == StationMode.APOTH_SALVAGING) {
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 44, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 75, this.topPos + 131, 40.0f, 70.0f, 24, 17, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 114, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
             }
         }
 
@@ -367,8 +419,8 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
                     graphics.item(stack, sx, sy);
                     graphics.itemDecorations(this.font, stack, sx, sy);
                 }
-                if (mouseX >= sx && mouseX < sx + 18 && mouseY >= sy && mouseY < sy + 18) {
-                    graphics.fill(sx, sy, sx + 18, sy + 18, 0x50FFFFFF);
+                if (mouseX >= sx && mouseX < sx + 16 && mouseY >= sy && mouseY < sy + 16) {
+                    graphics.fill(sx, sy, sx + 16, sy + 16, 0x50FFFFFF);
                 }
             }
         }
@@ -485,6 +537,40 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
                 graphics.blit(WIDGETS_TEXTURE, this.leftPos + 65, this.topPos + 129, 190, 0, 18, 18);
                 graphics.blit(WIDGETS_TEXTURE, this.leftPos + 123, this.topPos + 129, 190, 0, 18, 18);
                 graphics.blit(WIDGETS_TEXTURE, this.leftPos + 92, this.topPos + 130, 40, 70, 24, 17);
+            } else if (mode == StationMode.GRINDSTONE || mode == StationMode.CARTOGRAPHY) {
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 34, this.topPos + 119, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 34, this.topPos + 141, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 67, this.topPos + 131, 40, 70, 24, 17);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 104, this.topPos + 130, 190, 0, 18, 18);
+            } else if (mode == StationMode.ANVIL || mode == StationMode.FD_CUTTING || mode == StationMode.TETRA_WORKBENCH) {
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 34, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 64, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 91, this.topPos + 131, 40, 70, 24, 17);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 122, this.topPos + 130, 190, 0, 18, 18);
+            } else if (mode == StationMode.LOOM) {
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 24, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 48, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 72, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 96, this.topPos + 131, 40, 70, 24, 17);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 124, this.topPos + 130, 190, 0, 18, 18);
+            } else if (mode == StationMode.FD_COOKING) {
+                for (int c = 0; c < 3; c++) {
+                    graphics.blit(WIDGETS_TEXTURE, this.leftPos + 24 + c * 20, this.topPos + 117, 190, 0, 18, 18);
+                    graphics.blit(WIDGETS_TEXTURE, this.leftPos + 24 + c * 20, this.topPos + 137, 190, 0, 18, 18);
+                }
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 93, this.topPos + 147, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 92, this.topPos + 126, 40, 70, 24, 17);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 123, this.topPos + 125, 190, 0, 18, 18);
+            } else if (mode == StationMode.APOTH_REFORGING || mode == StationMode.APOTH_GEM_CUTTING) {
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 34, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 59, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 84, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 104, this.topPos + 131, 40, 70, 24, 17);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 127, this.topPos + 130, 190, 0, 18, 18);
+            } else if (mode == StationMode.APOTH_SALVAGING) {
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 44, this.topPos + 130, 190, 0, 18, 18);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 75, this.topPos + 131, 40, 70, 24, 17);
+                graphics.blit(WIDGETS_TEXTURE, this.leftPos + 114, this.topPos + 130, 190, 0, 18, 18);
             }
         }
 
@@ -534,8 +620,8 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
                     graphics.renderItem(stack, sx, sy);
                     graphics.renderItemDecorations(this.font, stack, sx, sy);
                 }
-                if (mouseX >= sx && mouseX < sx + 18 && mouseY >= sy && mouseY < sy + 18) {
-                    graphics.fill(sx, sy, sx + 18, sy + 18, 0x50FFFFFF);
+                if (mouseX >= sx && mouseX < sx + 16 && mouseY >= sy && mouseY < sy + 16) {
+                    graphics.fill(sx, sy, sx + 16, sy + 16, 0x50FFFFFF);
                 }
             }
         }

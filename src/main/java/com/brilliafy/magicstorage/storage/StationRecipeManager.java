@@ -749,6 +749,21 @@ public class StationRecipeManager {
             }
             return ItemStack.EMPTY;
         }
+        if (mode == StationMode.ANVIL) {
+            ItemStack s0 = craftSlots.getItem(0);
+            ItemStack s1 = craftSlots.getItem(1);
+            if (!s0.isEmpty() && !s1.isEmpty() && s0.is(s1.getItem()) && s0.isDamageableItem()) {
+                int maxDmg = s0.getMaxDamage();
+                int rem0 = maxDmg - s0.getDamageValue();
+                int rem1 = maxDmg - s1.getDamageValue();
+                int bonus = maxDmg * 12 / 100;
+                int combinedRem = Math.min(maxDmg, rem0 + rem1 + bonus);
+                ItemStack res = s0.copy();
+                res.setDamageValue(Math.max(0, maxDmg - combinedRem));
+                return res;
+            }
+            return ItemStack.EMPTY;
+        }
         if (mode == StationMode.LOOM) {
             return getLoomResult(craftSlots.getItem(0), craftSlots.getItem(1), craftSlots.getItem(2), level);
         }
@@ -765,6 +780,22 @@ public class StationRecipeManager {
         }
         if (mode == StationMode.FD_CUTTING) {
             return FarmersDelightCompat.computeCuttingResult(craftSlots.getItem(0), craftSlots.getItem(1), level);
+        }
+        if (mode == StationMode.APOTH_REFORGING) {
+            return ApotheosisCompat.computeReforgingResult(
+                    craftSlots.getItem(0), craftSlots.getItem(1), craftSlots.getItem(2), level, player
+            );
+        }
+        if (mode == StationMode.APOTH_SALVAGING) {
+            return ApotheosisCompat.computeSalvageResult(craftSlots.getItem(0), level);
+        }
+        if (mode == StationMode.APOTH_GEM_CUTTING) {
+            return ApotheosisCompat.computeGemCuttingResult(
+                    craftSlots.getItem(0), craftSlots.getItem(1), craftSlots.getItem(2), level
+            );
+        }
+        if (mode == StationMode.TETRA_WORKBENCH) {
+            return TetraCompat.computeWorkbenchResult(craftSlots.getItem(0), craftSlots.getItem(1));
         }
         return computeStationResult(craftSlots, level, stations, player);
     }

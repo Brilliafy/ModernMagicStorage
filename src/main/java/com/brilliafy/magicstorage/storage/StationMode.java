@@ -13,7 +13,11 @@ public enum StationMode {
     CARTOGRAPHY(6, "Cartography Table", Items.CARTOGRAPHY_TABLE),
     ANVIL(7, "Anvil", Items.ANVIL),
     FD_COOKING(8, "Cooking Pot", Items.BOWL),
-    FD_CUTTING(9, "Cutting Board", Items.SHEARS);
+    FD_CUTTING(9, "Cutting Board", Items.SHEARS),
+    APOTH_REFORGING(10, "Reforging Table", Items.ANVIL),
+    APOTH_SALVAGING(11, "Salvaging Table", Items.SMITHING_TABLE),
+    APOTH_GEM_CUTTING(12, "Gem Cutting Table", Items.STONECUTTER),
+    TETRA_WORKBENCH(13, "Modular Workbench", Items.CRAFTING_TABLE);
 
     private final int id;
     private final String title;

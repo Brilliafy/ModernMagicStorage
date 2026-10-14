@@ -51,6 +51,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
     private int furnaceLitDuration = 0;
     private int furnaceCookingProgress = 0;
     private int furnaceCookingTotalTime = 200;
+    private long lastTickGameTime = 0;
 
     public StorageHeartBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.STORAGE_HEART, pos, state);
@@ -61,6 +62,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
             if (be.networkDirty) {
                 be.refreshNetwork();
             }
+            be.catchUpVirtualFurnace(level);
             be.tickVirtualFurnace();
         }
     }
@@ -107,6 +109,103 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         setChanged();
     }
 
+    private void consumeFuelItem(Level level, ItemStack fuel) {
+        //? >= 26.1 {
+        /*net.minecraft.world.item.ItemStackTemplate remainder = fuel.getItem().getCraftingRemainder();
+        fuel.shrink(1);
+        if (remainder != null) {
+            if (fuel.isEmpty()) {
+                setItem(FURNACE_SLOT_FUEL, remainder.create());
+            } else {
+                net.minecraft.world.Containers.dropItemStack(level, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), remainder.create());
+            }
+        }
+        *///?} < 26.1 {
+        ItemStack remainder = ItemStack.EMPTY;
+        if (fuel.getItem().hasCraftingRemainingItem()) {
+            remainder = new ItemStack(fuel.getItem().getCraftingRemainingItem());
+        }
+        fuel.shrink(1);
+        if (!remainder.isEmpty()) {
+            if (fuel.isEmpty()) {
+                setItem(FURNACE_SLOT_FUEL, remainder);
+            } else {
+                net.minecraft.world.Containers.dropItemStack(level, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), remainder);
+            }
+        }
+        //?}
+    }
+
+    public void catchUpVirtualFurnace(Level level) {
+        if (level == null || level.isClientSide()) return;
+        long gameTime = level.getGameTime();
+        if (lastTickGameTime > 0 && gameTime > lastTickGameTime + 1) {
+            long missed = gameTime - lastTickGameTime - 1;
+            simulateFurnaceTicks(level, (int) Math.min(missed, 72000L));
+        }
+        lastTickGameTime = gameTime;
+    }
+
+    public void simulateFurnaceTicks(Level level, int ticksToSimulate) {
+        boolean hasFurnace = stationManager.hasFurnace();
+        boolean hasBlast = stationManager.hasBlastFurnace();
+        boolean hasSmoker = stationManager.hasSmoker();
+        if (!hasFurnace && !hasBlast && !hasSmoker) return;
+
+        int remainingTicks = ticksToSimulate;
+        while (remainingTicks > 0) {
+            ItemStack input = getItem(FURNACE_SLOT_INPUT);
+            if (input.isEmpty()) {
+                if (furnaceLitTime > 0) {
+                    furnaceLitTime = Math.max(0, furnaceLitTime - remainingTicks);
+                }
+                break;
+            }
+
+            StationRecipeManager.SmeltResult result = StationRecipeManager.getSmeltResult(
+                    input, level, hasBlast, hasSmoker, hasFurnace
+            );
+            if (result == null || !canSmelt(result.getResult())) {
+                if (furnaceLitTime > 0) {
+                    furnaceLitTime = Math.max(0, furnaceLitTime - remainingTicks);
+                }
+                furnaceCookingProgress = 0;
+                break;
+            }
+
+            furnaceCookingTotalTime = result.getCookTime();
+            int speed = Math.max(1, result.getSpeed());
+
+            if (furnaceLitTime <= 0) {
+                ItemStack fuel = getItem(FURNACE_SLOT_FUEL);
+                int burn = StationRecipeManager.getFuelBurnTime(fuel, level);
+                if (burn <= 0) {
+                    furnaceCookingProgress = 0;
+                    break;
+                }
+                furnaceLitTime = burn;
+                furnaceLitDuration = burn;
+                consumeFuelItem(level, fuel);
+                setChanged();
+            }
+
+            int cookProgressNeeded = furnaceCookingTotalTime - furnaceCookingProgress;
+            int ticksNeeded = (cookProgressNeeded + speed - 1) / speed;
+            int step = Math.min(remainingTicks, Math.min(furnaceLitTime, ticksNeeded));
+            if (step <= 0) step = 1;
+
+            furnaceLitTime -= step;
+            furnaceCookingProgress += step * speed;
+            remainingTicks -= step;
+
+            if (furnaceCookingProgress >= furnaceCookingTotalTime) {
+                furnaceCookingProgress = 0;
+                smeltItem(result.getResult());
+                setChanged();
+            }
+        }
+    }
+
     public void tickVirtualFurnace() {
         if (level == null || level.isClientSide()) return;
         boolean hasFurnace = stationManager.hasFurnace();
@@ -134,23 +233,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
                     if (burn > 0) {
                         furnaceLitTime = burn;
                         furnaceLitDuration = burn;
-                        //? >= 26.1 {
-                        /*net.minecraft.world.item.ItemStackTemplate remainder = fuel.getItem().getCraftingRemainder();
-                        fuel.shrink(1);
-                        if (remainder != null) {
-                            if (fuel.isEmpty()) {
-                                setItem(FURNACE_SLOT_FUEL, remainder.create());
-                            } else {
-                                net.minecraft.world.Containers.dropItemStack(level, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), remainder.create());
-                            }
-                        }
-                        *///?} < 26.1 {
-                        if (fuel.getItem().hasCraftingRemainingItem()) {
-                            setItem(FURNACE_SLOT_FUEL, new ItemStack(fuel.getItem().getCraftingRemainingItem()));
-                        } else {
-                            fuel.shrink(1);
-                        }
-                        //?}
+                        consumeFuelItem(level, fuel);
                         dirty = true;
                     }
                 }
@@ -370,6 +453,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         output.putInt("FurnaceLitDuration", furnaceLitDuration);
         output.putInt("FurnaceCookingProgress", furnaceCookingProgress);
         output.putInt("FurnaceCookingTotalTime", furnaceCookingTotalTime);
+        output.putLong("LastTickGameTime", level != null ? level.getGameTime() : lastTickGameTime);
     }
 
     @Override
@@ -380,6 +464,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         furnaceLitDuration = input.getIntOr("FurnaceLitDuration", 0);
         furnaceCookingProgress = input.getIntOr("FurnaceCookingProgress", 0);
         furnaceCookingTotalTime = input.getIntOr("FurnaceCookingTotalTime", 200);
+        lastTickGameTime = input.getLongOr("LastTickGameTime", 0L);
         stationManager.updateStations(stationInventory.subList(0, StationManager.STATION_SLOTS));
         this.networkDirty = true;
     }
@@ -392,6 +477,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         tag.putInt("FurnaceLitDuration", furnaceLitDuration);
         tag.putInt("FurnaceCookingProgress", furnaceCookingProgress);
         tag.putInt("FurnaceCookingTotalTime", furnaceCookingTotalTime);
+        tag.putLong("LastTickGameTime", level != null ? level.getGameTime() : lastTickGameTime);
     }
 
     @Override
@@ -402,6 +488,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         furnaceLitDuration = tag.getInt("FurnaceLitDuration");
         furnaceCookingProgress = tag.getInt("FurnaceCookingProgress");
         furnaceCookingTotalTime = tag.contains("FurnaceCookingTotalTime") ? tag.getInt("FurnaceCookingTotalTime") : 200;
+        lastTickGameTime = tag.contains("LastTickGameTime") ? tag.getLong("LastTickGameTime") : 0L;
         stationManager.updateStations(stationInventory.subList(0, StationManager.STATION_SLOTS));
         this.networkDirty = true;
     }
@@ -414,6 +501,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         tag.putInt("FurnaceLitDuration", furnaceLitDuration);
         tag.putInt("FurnaceCookingProgress", furnaceCookingProgress);
         tag.putInt("FurnaceCookingTotalTime", furnaceCookingTotalTime);
+        tag.putLong("LastTickGameTime", level != null ? level.getGameTime() : lastTickGameTime);
     }
 
     @Override
@@ -424,6 +512,7 @@ public class StorageHeartBlockEntity extends BlockEntity implements MenuProvider
         furnaceLitDuration = tag.getInt("FurnaceLitDuration");
         furnaceCookingProgress = tag.getInt("FurnaceCookingProgress");
         furnaceCookingTotalTime = tag.contains("FurnaceCookingTotalTime") ? tag.getInt("FurnaceCookingTotalTime") : 200;
+        lastTickGameTime = tag.contains("LastTickGameTime") ? tag.getLong("LastTickGameTime") : 0L;
         stationManager.updateStations(stationInventory.subList(0, StationManager.STATION_SLOTS));
         this.networkDirty = true;
     }

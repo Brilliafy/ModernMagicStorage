@@ -308,7 +308,15 @@ public class StorageAccessMenu extends AbstractContainerMenu {
     }
 
     @Override
+    public void removed(Player player) {
+        if (!getCarried().isEmpty() && heart != null) {
+            setCarried(heart.insertItem(getCarried()));
+        }
+        super.removed(player);
+    }
+
+    @Override
     public boolean stillValid(Player player) {
-        return heart == null || heart.stillValid(player);
+        return heart == null || (!heart.isRemoved() && player.isAlive());
     }
 }

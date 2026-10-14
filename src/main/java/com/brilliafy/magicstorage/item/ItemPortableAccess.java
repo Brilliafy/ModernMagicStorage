@@ -4,7 +4,11 @@ import com.brilliafy.magicstorage.block.BlockRemoteAccess;
 import com.brilliafy.magicstorage.blockentity.RemoteAccessBlockEntity;
 import com.brilliafy.magicstorage.blockentity.StorageHeartBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 //? < 26.1 {
@@ -122,8 +126,25 @@ public class ItemPortableAccess extends Item {
             return null;
         }
 
-        BlockEntity be = level.getBlockEntity(pos);
+        Level targetLevel = level;
+        if (level.getServer() != null && !dim.isEmpty()) {
+            ResourceLocation dimLoc = ResourceLocation.tryParse(dim);
+            if (dimLoc != null) {
+                ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, dimLoc);
+                ServerLevel foundLevel = level.getServer().getLevel(dimKey);
+                if (foundLevel != null) {
+                    targetLevel = foundLevel;
+                }
+            }
+        }
+
+        if (targetLevel instanceof ServerLevel serverLevel) {
+            serverLevel.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
+        }
+
+        BlockEntity be = targetLevel.getBlockEntity(pos);
         if (be instanceof StorageHeartBlockEntity heart) {
+            heart.catchUpVirtualFurnace(targetLevel);
             return heart;
         }
         com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_heart_missing"), true);
