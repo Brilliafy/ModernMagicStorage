@@ -76,4 +76,15 @@ public class ItemHelper {
         player.displayClientMessage(component, overlay);
         //?}
     }
+
+    public static void dropItem(net.minecraft.world.entity.player.Player player, ItemStack stack) {
+        if (stack == null || stack.isEmpty() || player == null) return;
+        //? >= 26.1 {
+        /*if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            player.spawnAtLocation(serverLevel, stack);
+        }
+        *///?} < 26.1 {
+        player.drop(stack, false);
+        //?}
+    }
 }

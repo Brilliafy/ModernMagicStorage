@@ -1,6 +1,7 @@
 package com.brilliafy.magicstorage.storage;
 
 import com.brilliafy.magicstorage.compat.apotheosis.ApotheosisCompat;
+import com.brilliafy.magicstorage.compat.farmersdelight.FarmersDelightCompat;
 import com.brilliafy.magicstorage.compat.tetra.TetraCompat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -32,6 +33,10 @@ public class StationManager {
     private boolean hasApotheosisSalvagingTable;
     private boolean hasApotheosisGemCuttingTable;
     private boolean hasTetraModularWorkbench;
+    private boolean hasFarmersDelightCookingPot;
+    private boolean hasFarmersDelightCuttingBoard;
+    private boolean hasFarmersDelightSkillet;
+    private boolean hasFarmersDelightStove;
 
     public void updateStations(List<ItemStack> stations) {
         hasCraftingTable = false;
@@ -54,6 +59,10 @@ public class StationManager {
         hasApotheosisSalvagingTable = false;
         hasApotheosisGemCuttingTable = false;
         hasTetraModularWorkbench = false;
+        hasFarmersDelightCookingPot = false;
+        hasFarmersDelightCuttingBoard = false;
+        hasFarmersDelightSkillet = false;
+        hasFarmersDelightStove = false;
 
         for (ItemStack stack : stations) {
             if (stack.isEmpty()) continue;
@@ -103,6 +112,19 @@ public class StationManager {
                 hasTetraModularWorkbench = true;
             }
 
+            if (FarmersDelightCompat.isCookingPot(stack)) {
+                hasFarmersDelightCookingPot = true;
+            } else if (FarmersDelightCompat.isCuttingBoard(stack)) {
+                hasFarmersDelightCuttingBoard = true;
+            } else if (FarmersDelightCompat.isSkillet(stack)) {
+                hasFarmersDelightSkillet = true;
+                hasFurnace = true;
+            } else if (FarmersDelightCompat.isStove(stack)) {
+                hasFarmersDelightStove = true;
+                hasFurnace = true;
+                hasSmoker = true;
+            }
+
             ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
             String path = key.getPath();
             String namespace = key.getNamespace();
@@ -139,6 +161,10 @@ public class StationManager {
             return true;
         }
 
+        if (FarmersDelightCompat.isFarmersDelightStation(stack)) {
+            return true;
+        }
+
         ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String namespace = key.getNamespace();
         String path = key.getPath();
@@ -170,4 +196,8 @@ public class StationManager {
     public boolean hasApotheosisSalvagingTable() { return hasApotheosisSalvagingTable; }
     public boolean hasApotheosisGemCuttingTable() { return hasApotheosisGemCuttingTable; }
     public boolean hasTetraModularWorkbench() { return hasTetraModularWorkbench; }
+    public boolean hasFarmersDelightCookingPot() { return hasFarmersDelightCookingPot; }
+    public boolean hasFarmersDelightCuttingBoard() { return hasFarmersDelightCuttingBoard; }
+    public boolean hasFarmersDelightSkillet() { return hasFarmersDelightSkillet; }
+    public boolean hasFarmersDelightStove() { return hasFarmersDelightStove; }
 }

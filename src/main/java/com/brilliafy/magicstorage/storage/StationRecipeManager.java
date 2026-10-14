@@ -1,6 +1,7 @@
 package com.brilliafy.magicstorage.storage;
 
 import com.brilliafy.magicstorage.compat.apotheosis.ApotheosisCompat;
+import com.brilliafy.magicstorage.compat.farmersdelight.FarmersDelightCompat;
 import com.brilliafy.magicstorage.compat.tetra.TetraCompat;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -165,6 +166,11 @@ public class StationRecipeManager {
                     if (!loom.isEmpty()) return loom;
                 }
             }
+            // F. Farmer's Delight Cutting Board (Input Item + Tool)
+            if (stations.hasFarmersDelightCuttingBoard()) {
+                ItemStack cut = FarmersDelightCompat.computeCuttingResult(s0, s1, level);
+                if (!cut.isEmpty()) return cut;
+            }
         }
 
         // 3. Three-Item Recipes (nonNull.size() == 3)
@@ -236,6 +242,12 @@ public class StationRecipeManager {
             }
         }
 
+        // 4. Farmer's Delight Cooking Pot (1-6 ingredients + optional container)
+        if (stations.hasFarmersDelightCookingPot() && nonNull.size() >= 1 && nonNull.size() <= 7) {
+            ItemStack cooked = FarmersDelightCompat.computeCookingPotResult(nonNull, level);
+            if (!cooked.isEmpty()) return cooked;
+        }
+
         return ItemStack.EMPTY;
     }
 
@@ -250,6 +262,9 @@ public class StationRecipeManager {
                     return true;
                 }
             }
+        }
+        if (FarmersDelightCompat.isCuttingToolSlot(craftSlots, slot, level)) {
+            return true;
         }
         return false;
     }

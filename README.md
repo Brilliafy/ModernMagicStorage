@@ -46,6 +46,10 @@ Modern Magic Storage is built on **Jared's MultiLoader-Template** architecture, 
   - **Furnace / Blast Furnace / Smoker**: Smelting, blasting, and smoking recipes directly in the grid when the corresponding furnace stations are installed in the Heart.
   - **Cartography Table**: Map zooming (+Paper), map locking (+Glass Pane), and map cloning (+Empty Map).
   - **Loom**: Banner pattern crafting (Banner + Dye + optional Pattern item). Banner pattern items are reusable and preserved in the grid.
+  - **Farmer's Delight Stations**:
+    - **Cooking Pot**: 1 to 6 shapeless meal ingredients + required container (e.g. Bowl, Glass Bottle) directly in the grid. Validates required serving containers and produces hot meals.
+    - **Cutting Board**: Input item + cutting tool (Knife, Axe, Shears) in any grid arrangement. Accurately damages tool durability by 1, keeps the tool in the crafting grid, consumes the ingredient, produces the primary slice, and drops all configured secondary/chance drops (e.g. Tree Bark, Straw) with sound effects.
+    - **Stove & Skillet**: Recognized as valid heating and cooking stations within the Storage Heart.
   - **Apotheosis Stations**:
     - **Reforging Table**: Re-rolling affix rarities using gem dust and materials.
     - **Salvaging Table**: Breaking down affix gear into scrap materials.
@@ -68,10 +72,11 @@ All third-party integrations are soft/optional dependencies. If a mod is not pre
 
 | Mod | Modern Role & Compatibility |
 | :--- | :--- |
+| **[Farmer's Delight](https://github.com/vectorwing/FarmersDelight)** | Full culinary integration: **Cooking Pot** (1–6 shapeless ingredients with container matching) and **Cutting Board** (input item + tool with durability damage, tool retention in grid, and secondary/chance drops). |
 | **[Apotheosis](https://github.com/Shadows-of-Fire/Apotheosis)** | Crafting station support: **Reforging Table** (re-rolling affix rarities with gem dust and materials), **Salvaging Table** (breaking down gear into scrap materials), and **Gem Cutting Table** (upgrading affix gems). |
 | **[Tetra](https://github.com/mickelus/tetra)** | Crafting station support: **Modular Workbench** (detecting modular tool components and honing materials). |
 | **[Curios API](https://github.com/TheIllusiveC4/Curios)** | Modern replacement for Baubles. Recognizes accessory reforging anvils as valid Heart stations. |
-| **[JEI (Just Enough Items)](https://github.com/mezz/JustEnoughItems)** | Full recipe transfer support (`+`) into Crafting Access for Crafting, Stonecutting, Smithing, Smelting, Blasting, and Smoking, pulling ingredients from network storage and player inventory. |
+| **[JEI (Just Enough Items)](https://github.com/mezz/JustEnoughItems)** | Full recipe transfer support (`+`) into Crafting Access for Crafting, Stonecutting, Smithing, Smelting, Blasting, Smoking, Cooking Pot, and Cutting Board, pulling ingredients from network storage and player inventory. |
 | **[Fair Experience](https://github.com/Brilliafy/ModernFairExperience)** | Companion mod. Seamlessly calculates fair raw XP costs for anvil and enchanting station operations. |
 | **[Quality Equipment](https://www.curseforge.com/minecraft/mc-mods/quality-equipment)** | Supports reforging station detection. |
 | **[Reskillable Reimagined](https://www.curseforge.com/minecraft/mc-mods/reskillable-reimagined)** | Validates player skill requirements before allowing access to restricted gear. |

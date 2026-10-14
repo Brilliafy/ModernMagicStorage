@@ -1,6 +1,7 @@
 package com.brilliafy.magicstorage.menu;
 
 import com.brilliafy.magicstorage.blockentity.StorageHeartBlockEntity;
+import com.brilliafy.magicstorage.compat.farmersdelight.FarmersDelightCompat;
 import com.brilliafy.magicstorage.init.ModMenus;
 import com.brilliafy.magicstorage.util.ItemHelper;
 import net.minecraft.world.Container;
@@ -62,17 +63,48 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             TransientCraftingContainer craftSlots = menu.getCraftSlots();
             ItemStack patternBackup = ItemStack.EMPTY;
             int patternSlot = -1;
+            boolean isCuttingTool = false;
+            ItemStack cutItem = ItemStack.EMPTY;
+            ItemStack toolItem = ItemStack.EMPTY;
+
             for (int i = 0; i < craftSlots.getContainerSize(); i++) {
                 if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusableIngredient(craftSlots, i, menu.level)) {
                     patternSlot = i;
                     patternBackup = craftSlots.getItem(i).copy();
+                    if (FarmersDelightCompat.isCuttingToolSlot(craftSlots, i, menu.level)) {
+                        isCuttingTool = true;
+                        toolItem = patternBackup;
+                        for (int j = 0; j < craftSlots.getContainerSize(); j++) {
+                            if (j != i && !craftSlots.getItem(j).isEmpty()) {
+                                cutItem = craftSlots.getItem(j).copy();
+                                break;
+                            }
+                        }
+                    }
                     break;
                 }
             }
+
             super.onTake(player, stack);
+
             if (patternSlot != -1 && !patternBackup.isEmpty()) {
-                craftSlots.setItem(patternSlot, patternBackup);
+                if (isCuttingTool && patternBackup.isDamageableItem()) {
+                    int newDmg = patternBackup.getDamageValue() + 1;
+                    if (newDmg < patternBackup.getMaxDamage()) {
+                        patternBackup.setDamageValue(newDmg);
+                        craftSlots.setItem(patternSlot, patternBackup);
+                    } else {
+                        craftSlots.setItem(patternSlot, ItemStack.EMPTY);
+                    }
+                } else {
+                    craftSlots.setItem(patternSlot, patternBackup);
+                }
             }
+
+            if (isCuttingTool && !cutItem.isEmpty() && !toolItem.isEmpty()) {
+                FarmersDelightCompat.handleCuttingBoardDrops(cutItem, toolItem, player, menu.level);
+            }
+
             menu.slotsChanged(craftSlots);
         }
     }
@@ -193,7 +225,13 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         for (int i = 0; i < 9; i++) {
             ItemStack inGrid = craftSlots.getItem(i);
             if (!inGrid.isEmpty()) {
-                if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusableIngredient(craftSlots, i, level)) continue;
+                if (com.brilliafy.magicstorage.storage.StationRecipeManager.isReusableIngredient(craftSlots, i, level)) {
+                    if (FarmersDelightCompat.isCuttingToolSlot(craftSlots, i, level) && inGrid.isDamageableItem()) {
+                        int remDmg = inGrid.getMaxDamage() - inGrid.getDamageValue();
+                        maxCrafts = Math.min(maxCrafts, remDmg);
+                    }
+                    continue;
+                }
                 if (inGrid.isDamageableItem()) {
                     maxCrafts = Math.min(maxCrafts, inGrid.getCount());
                 } else {
@@ -235,6 +273,21 @@ public class CraftingAccessMenu extends StorageAccessMenu {
 
             if (!canCraftOne) break;
             craftedCount += singleResult.getCount();
+        }
+
+        // Apply durability damage to cutting tools used in batch craft
+        for (int i = 0; i < 9; i++) {
+            ItemStack inGrid = craftSlots.getItem(i);
+            if (!inGrid.isEmpty() && FarmersDelightCompat.isCuttingToolSlot(craftSlots, i, level) && inGrid.isDamageableItem()) {
+                int craftsDone = singleResult.getCount() > 0 ? craftedCount / singleResult.getCount() : 0;
+                int newDmg = inGrid.getDamageValue() + craftsDone;
+                if (newDmg < inGrid.getMaxDamage()) {
+                    inGrid.setDamageValue(newDmg);
+                } else {
+                    craftSlots.setItem(i, ItemStack.EMPTY);
+                }
+                break;
+            }
         }
 
         int maxStack = singleResult.getMaxStackSize();

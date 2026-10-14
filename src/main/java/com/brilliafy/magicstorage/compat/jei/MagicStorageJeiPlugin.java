@@ -78,5 +78,37 @@ public class MagicStorageJeiPlugin implements IModPlugin {
                 36,
                 36
         );
+
+        if (com.brilliafy.magicstorage.compat.farmersdelight.FarmersDelightCompat.isLoaded()) {
+            try {
+                Class<?> fdTypes = Class.forName("vectorwing.farmersdelight.integration.jei.FDRecipeTypes");
+                java.lang.reflect.Field cookingField = fdTypes.getField("COOKING");
+                mezz.jei.api.recipe.RecipeType<?> cookingType = (mezz.jei.api.recipe.RecipeType<?>) cookingField.get(null);
+                if (cookingType != null) {
+                    registration.addRecipeTransferHandler(
+                            CraftingAccessMenu.class,
+                            ModMenus.CRAFTING_ACCESS,
+                            cookingType,
+                            73,
+                            7,
+                            36,
+                            36
+                    );
+                }
+                java.lang.reflect.Field cuttingField = fdTypes.getField("CUTTING");
+                mezz.jei.api.recipe.RecipeType<?> cuttingType = (mezz.jei.api.recipe.RecipeType<?>) cuttingField.get(null);
+                if (cuttingType != null) {
+                    registration.addRecipeTransferHandler(
+                            CraftingAccessMenu.class,
+                            ModMenus.CRAFTING_ACCESS,
+                            cuttingType,
+                            73,
+                            2,
+                            36,
+                            36
+                    );
+                }
+            } catch (Throwable ignored) {}
+        }
     }
 }
