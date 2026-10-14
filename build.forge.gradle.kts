@@ -17,7 +17,7 @@ platform {
 			forgeLikeVersionRange = prop("deps.minecraft")
 		}
 		required("forge") {
-			forgeLikeVersionRange.set("[${prop("deps.forge")},)")
+			forgeLikeVersionRange.set("[47.1.0,)")
 		}
 		if (sc.current.parsed < "26") {
 			optional("jei") { slug("jei") }

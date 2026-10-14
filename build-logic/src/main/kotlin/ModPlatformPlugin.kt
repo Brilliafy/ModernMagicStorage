@@ -33,8 +33,8 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 			loader.convention(inferredLoader.id)
 		}
 
-		when (inferredLoader) {
-			is Loader.Fabric -> {
+		when {
+			inferredLoader.isFabricLike -> {
 				extension.jarTask.convention(providers.provider {
 					extensions.getByType<dev.kikugie.loomx.LoomCompatProjectExtension>().modJar.name
 				})
@@ -43,7 +43,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 				})
 			}
 
-			is Loader.Forge -> {
+			inferredLoader.isLegacyForge -> {
 				extension.jarTask.convention("reobfJar")
 				extension.sourcesJarTask.convention("sourcesJar")
 			}
@@ -71,7 +71,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 		val ctx = Context(
 			project = this,
 			extension = extension,
-			loader = Loader.of(extension.loader.get()),
+			loader = inferredLoader,
 			stonecutter = project.sc
 		)
 		configureProject(ctx)
@@ -159,8 +159,8 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 		tasks.withType<Jar>().configureEach {
 			archiveBaseName.set(ctx.modId)
 			dependsOn(generateTask)
-			if (ctx.loader is Loader.Forge) {
-				manifest.attributes(ctx.loader.mixinConfigAttribute to "${ctx.modId}.mixins.json")
+			if (ctx.loader.mixinConfigAttribute != null) {
+				manifest.attributes(ctx.loader.mixinConfigAttribute!! to "${ctx.modId}.mixins.json")
 			}
 		}
 	}

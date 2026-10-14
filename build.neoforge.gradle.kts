@@ -19,8 +19,8 @@ platform {
 		required("neoforge") {
 			forgeLikeVersionRange.set("[${prop("deps.neoforge")},)")
 		}
+		optional("jei") { slug("jei") }
 		if (sc.current.parsed < "26") {
-			optional("jei") { slug("jei") }
 			optional("curios") { slug("curios") }
 			optional("apotheosis") { slug("apotheosis") }
 			optional("quality_equipment") { slug("quality-equipment", "quality-equipment") }
@@ -75,7 +75,9 @@ repositories {
 dependencies {
 	compileOnly(libs.mixinextras.common)
 	annotationProcessor(libs.mixinextras.common)
-	if (sc.current.parsed < "26") {
+	if (sc.current.parsed >= "26") {
+		compileOnly("mezz.jei:jei-26.3-neoforge:31.12.0.66")
+	} else {
 		compileOnly("mezz.jei:jei-${sc.current.version}-neoforge:19.64.0.453")
 	}
 }

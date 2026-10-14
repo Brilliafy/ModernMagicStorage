@@ -13,6 +13,8 @@ sealed class Loader(val id: String) {
 	abstract val excludedResources: List<String>
 
 	open val isFabricLike: Boolean = false
+	open val isLegacyForge: Boolean = false
+	open val mixinConfigAttribute: String? = null
 
 	abstract fun generateManifest(ctx: Context): String
 
@@ -128,15 +130,24 @@ sealed class Loader(val id: String) {
 	}
 
 	object Forge : ForgeLike("forge") {
+		override val isLegacyForge = true
 		override val modManifestPath = "META-INF/mods.toml"
 		override val excludedResources = super.excludedResources + "META-INF/neoforge.mods.toml"
-		val mixinConfigAttribute = "MixinConfigs"
+		override val mixinConfigAttribute = "MixinConfigs"
+	}
+
+	object NeoForge120 : ForgeLike("neoforge") {
+		override val isLegacyForge = true
+		override val modManifestPath = "META-INF/mods.toml"
+		override val excludedResources = super.excludedResources + "META-INF/neoforge.mods.toml"
+		override val mixinConfigAttribute = "MixinConfigs"
 	}
 
 	companion object {
 		fun of(id: String): Loader = when (id) {
 			"fabric" -> Fabric
 			"neoforge" -> NeoForge
+			"neoforge120" -> NeoForge120
 			"forge" -> Forge
 			else -> error("Unknown loader: '$id'")
 		}

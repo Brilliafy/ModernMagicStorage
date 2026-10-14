@@ -1,6 +1,5 @@
 package com.brilliafy.magicstorage.compat.jei;
 
-//? < 26 {
 import com.brilliafy.magicstorage.Constants;
 import com.brilliafy.magicstorage.init.ModMenus;
 import com.brilliafy.magicstorage.menu.CraftingAccessMenu;
@@ -10,7 +9,11 @@ import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+//? < 26 {
 import mezz.jei.api.recipe.RecipeType;
+//?} else {
+/*import mezz.jei.api.recipe.types.IRecipeType;
+*///?}
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
@@ -73,7 +76,7 @@ public class MagicStorageJeiPlugin implements IModPlugin {
             return runTransfer(menu, recipeSlotsView, player, doTransfer);
         }
     }
-    *///?} >= 1.21 {
+    *///?} else {
     public static class CraftingTransferHandler
             implements IRecipeTransferHandler<CraftingAccessMenu, RecipeHolder<CraftingRecipe>> {
 
@@ -88,9 +91,15 @@ public class MagicStorageJeiPlugin implements IModPlugin {
         }
 
         @Override
+        //? < 26 {
         public RecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
             return RecipeTypes.CRAFTING;
         }
+        //?} else {
+        /*public IRecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
+            return RecipeTypes.CRAFTING;
+        }
+        *///?}
 
         @Override
         public IRecipeTransferError transferRecipe(CraftingAccessMenu menu, RecipeHolder<CraftingRecipe> recipe,
@@ -120,4 +129,3 @@ public class MagicStorageJeiPlugin implements IModPlugin {
         return null;
     }
 }
-//?}
