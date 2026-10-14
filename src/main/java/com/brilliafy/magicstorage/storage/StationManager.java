@@ -144,6 +144,11 @@ public class StationManager {
 
     public static boolean isAllowedStation(ItemStack stack) {
         if (stack.isEmpty()) return false;
+        return hasGuiWhenInteracted(stack);
+    }
+
+    public static boolean isBuiltInStation(ItemStack stack) {
+        if (stack.isEmpty()) return false;
         if (stack.is(Items.CRAFTING_TABLE) || stack.is(Items.FURNACE) || stack.is(Items.BLAST_FURNACE)
                 || stack.is(Items.SMOKER) || stack.is(Items.BREWING_STAND) || stack.is(Items.ANVIL)
                 || stack.is(Items.CHIPPED_ANVIL) || stack.is(Items.DAMAGED_ANVIL) || stack.is(Items.ENCHANTING_TABLE)
@@ -174,6 +179,126 @@ public class StationManager {
             return true;
         }
         return false;
+    }
+
+    public static boolean hasGuiWhenInteracted(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        if (isBuiltInStation(stack)) return true;
+
+        if (stack.getItem() instanceof net.minecraft.world.item.BlockItem blockItem) {
+            net.minecraft.world.level.block.Block block = blockItem.getBlock();
+            if (isExcludedBlock(block)) return false;
+
+            // 1. Direct MenuProvider on Block
+            if (block instanceof net.minecraft.world.MenuProvider) {
+                return true;
+            }
+
+            // 2. BlockEntity that implements MenuProvider or Container
+            if (block instanceof net.minecraft.world.level.block.EntityBlock entityBlock) {
+                try {
+                    net.minecraft.world.level.block.entity.BlockEntity be = entityBlock.newBlockEntity(
+                            net.minecraft.core.BlockPos.ZERO, block.defaultBlockState()
+                    );
+                    if (be instanceof net.minecraft.world.MenuProvider || be instanceof net.minecraft.world.Container) {
+                        return true;
+                    }
+                    if (be != null) {
+                        String name = be.getClass().getSimpleName().toLowerCase(java.util.Locale.ROOT);
+                        if (name.contains("menu") || name.contains("container") || name.contains("gui")
+                                || name.contains("screen") || name.contains("station") || name.contains("crafter")
+                                || name.contains("crafting") || name.contains("furnace") || name.contains("smelter")
+                                || name.contains("bench") || name.contains("table") || name.contains("machine")) {
+                            return true;
+                        }
+                    }
+                } catch (Throwable ignored) {}
+            }
+
+            // 3. MenuProvider from default block state
+            try {
+                if (block.defaultBlockState().getMenuProvider(null, net.minecraft.core.BlockPos.ZERO) != null) {
+                    return true;
+                }
+            } catch (Throwable ignored) {}
+
+            // 4. Overridden interaction method on Block class
+            Class<?> bClass = block.getClass();
+            while (bClass != null && bClass != net.minecraft.world.level.block.Block.class
+                    && bClass != net.minecraft.world.level.block.state.BlockBehaviour.class) {
+                for (java.lang.reflect.Method m : bClass.getDeclaredMethods()) {
+                    String mName = m.getName();
+                    if (mName.equals("use") || mName.equals("useWithoutItem") || mName.equals("useItemOn")
+                            || mName.equals("getMenuProvider") || mName.equals("openScreen")) {
+                        return true;
+                    }
+                }
+                bClass = bClass.getSuperclass();
+            }
+
+            // 5. Heuristic based on registry path or class name
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            String path = id.getPath().toLowerCase(java.util.Locale.ROOT);
+            if (isStationKeyword(path)) {
+                return true;
+            }
+
+            String className = block.getClass().getSimpleName().toLowerCase(java.util.Locale.ROOT);
+            if (isStationKeyword(className)) {
+                return true;
+            }
+        }
+
+        if (stack.getItem() instanceof net.minecraft.world.MenuProvider) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean isExcludedBlock(net.minecraft.world.level.block.Block block) {
+        if (block instanceof net.minecraft.world.level.block.DoorBlock
+                || block instanceof net.minecraft.world.level.block.TrapDoorBlock
+                || block instanceof net.minecraft.world.level.block.FenceGateBlock
+                || block instanceof net.minecraft.world.level.block.ButtonBlock
+                || block instanceof net.minecraft.world.level.block.LeverBlock
+                || block instanceof net.minecraft.world.level.block.PressurePlateBlock
+                || block instanceof net.minecraft.world.level.block.SignBlock
+                || block instanceof net.minecraft.world.level.block.BedBlock
+                || block instanceof net.minecraft.world.level.block.BellBlock
+                || block instanceof net.minecraft.world.level.block.CandleBlock
+                || block instanceof net.minecraft.world.level.block.CakeBlock
+                || block instanceof net.minecraft.world.level.block.FlowerPotBlock
+                || block instanceof net.minecraft.world.level.block.CropBlock
+                || block instanceof net.minecraft.world.level.block.SaplingBlock
+                || block instanceof net.minecraft.world.level.block.StairBlock
+                || block instanceof net.minecraft.world.level.block.SlabBlock
+                || block instanceof net.minecraft.world.level.block.WallBlock
+                || block instanceof net.minecraft.world.level.block.FenceBlock) {
+            return true;
+        }
+        String name = block.getClass().getSimpleName().toLowerCase(java.util.Locale.ROOT);
+        return name.contains("door") || name.contains("gate") || name.contains("button")
+                || name.contains("lever") || name.contains("pressure") || name.contains("sign")
+                || name.contains("bed") || name.contains("slab") || name.contains("stair")
+                || name.contains("fence") || name.contains("wall");
+    }
+
+    private static boolean isStationKeyword(String str) {
+        return str.contains("table") || str.contains("station") || str.contains("bench")
+                || str.contains("furnace") || str.contains("smelter") || str.contains("oven")
+                || str.contains("kiln") || str.contains("forge") || str.contains("anvil")
+                || str.contains("loom") || str.contains("cutter") || str.contains("saw")
+                || str.contains("press") || str.contains("crusher") || str.contains("grinder")
+                || str.contains("altar") || str.contains("mill") || str.contains("pot")
+                || str.contains("board") || str.contains("workbench") || str.contains("workstation")
+                || str.contains("machine") || str.contains("crafter") || str.contains("crafting")
+                || str.contains("infuser") || str.contains("charger") || str.contains("assembler")
+                || str.contains("fabricator") || str.contains("reforg") || str.contains("salvag")
+                || str.contains("honing") || str.contains("vat") || str.contains("distiller")
+                || str.contains("boiler") || str.contains("pulverizer") || str.contains("generator")
+                || str.contains("processor") || str.contains("brewing") || str.contains("cooker")
+                || str.contains("kitchen") || str.contains("cauldron");
     }
 
     public boolean hasCraftingTable() { return hasCraftingTable; }

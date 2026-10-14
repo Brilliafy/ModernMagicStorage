@@ -27,6 +27,8 @@ import net.minecraft.world.item.crafting.CraftingInput;
 public class CraftingAccessMenu extends StorageAccessMenu {
     public static final int STATION_SELECT_BASE = 100;
     public static final int RECIPE_SELECT_BASE = 120;
+    public static final int MODDED_STATION_SELECT_BASE = 160;
+    public static final int OPEN_MODDED_GUI_BASE = 180;
     public static final int OVERLAY_CLICK_BASE = 200;
     public static final int OVERLAY_DEPOSIT = 350;
 
@@ -34,11 +36,12 @@ public class CraftingAccessMenu extends StorageAccessMenu {
     protected final ResultContainer resultSlots = new ResultContainer();
     protected final Container furnaceContainer;
     protected final Container stationContainer = new SimpleContainer(StationManager.STATION_SLOTS);
-    protected final ContainerData furnaceData = new SimpleContainerData(6);
+    protected final ContainerData furnaceData = new SimpleContainerData(7);
     protected final Level level;
 
     protected StationMode activeMode = StationMode.CRAFTING;
     protected int selectedRecipeIndex = 0;
+    protected int selectedModdedStationSlot = -1;
 
     public CraftingAccessMenu(int containerId, Inventory playerInventory) {
         this(containerId, playerInventory, null);
@@ -164,6 +167,13 @@ public class CraftingAccessMenu extends StorageAccessMenu {
         return selectedRecipeIndex;
     }
 
+    public int getSelectedModdedStationSlot() {
+        if (level.isClientSide()) {
+            return furnaceData.get(6);
+        }
+        return selectedModdedStationSlot;
+    }
+
     public int getFurnaceLitTime() { return furnaceData.get(0); }
     public int getFurnaceLitDuration() { return furnaceData.get(1); }
     public int getFurnaceCookingProgress() { return furnaceData.get(2); }
@@ -184,6 +194,7 @@ public class CraftingAccessMenu extends StorageAccessMenu {
             furnaceData.set(3, heart.getFurnaceCookingTotalTime());
             furnaceData.set(4, activeMode.getId());
             furnaceData.set(5, selectedRecipeIndex);
+            furnaceData.set(6, selectedModdedStationSlot);
             syncStationContainer();
         }
         super.broadcastChanges();
@@ -193,12 +204,58 @@ public class CraftingAccessMenu extends StorageAccessMenu {
     public boolean clickMenuButton(Player player, int id) {
         if (id >= STATION_SELECT_BASE && id < STATION_SELECT_BASE + StationMode.values().length) {
             StationMode newMode = StationMode.fromId(id - STATION_SELECT_BASE);
-            if (newMode != activeMode) {
+            if (newMode != activeMode || selectedModdedStationSlot != -1) {
                 safeClearContainer(player, craftSlots);
                 activeMode = newMode;
+                selectedModdedStationSlot = -1;
                 selectedRecipeIndex = 0;
                 updateCraftingResult();
                 broadcastChanges();
+            }
+            return true;
+        }
+
+        if (id >= MODDED_STATION_SELECT_BASE && id < MODDED_STATION_SELECT_BASE + StationManager.STATION_SLOTS) {
+            int slotIdx = id - MODDED_STATION_SELECT_BASE;
+            ItemStack stationStack = stationContainer.getItem(slotIdx);
+            if (!stationStack.isEmpty()) {
+                if (activeMode != StationMode.MODDED || selectedModdedStationSlot != slotIdx) {
+                    safeClearContainer(player, craftSlots);
+                    activeMode = StationMode.MODDED;
+                    selectedModdedStationSlot = slotIdx;
+                    selectedRecipeIndex = 0;
+                    updateCraftingResult();
+                    broadcastChanges();
+                }
+            }
+            return true;
+        }
+
+        if (id >= OPEN_MODDED_GUI_BASE && id < OPEN_MODDED_GUI_BASE + StationManager.STATION_SLOTS) {
+            int slotIdx = id - OPEN_MODDED_GUI_BASE;
+            ItemStack stationStack = stationContainer.getItem(slotIdx);
+            if (!stationStack.isEmpty() && stationStack.getItem() instanceof net.minecraft.world.item.BlockItem blockItem) {
+                net.minecraft.world.level.block.Block block = blockItem.getBlock();
+                net.minecraft.world.MenuProvider provider = null;
+                if (block instanceof net.minecraft.world.MenuProvider mp) {
+                    provider = mp;
+                } else {
+                    provider = block.defaultBlockState().getMenuProvider(level, heart != null ? heart.getBlockPos() : player.blockPosition());
+                }
+                if (provider == null && block instanceof net.minecraft.world.level.block.EntityBlock entityBlock) {
+                    try {
+                        net.minecraft.world.level.block.entity.BlockEntity be = entityBlock.newBlockEntity(
+                                heart != null ? heart.getBlockPos() : player.blockPosition(), block.defaultBlockState()
+                        );
+                        if (be instanceof net.minecraft.world.MenuProvider mp) {
+                            provider = mp;
+                        }
+                    } catch (Throwable ignored) {}
+                }
+                if (provider != null) {
+                    player.openMenu(provider);
+                    return true;
+                }
             }
             return true;
         }

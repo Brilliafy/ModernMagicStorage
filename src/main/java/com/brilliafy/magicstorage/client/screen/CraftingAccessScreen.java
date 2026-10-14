@@ -38,7 +38,11 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
     private int stationScrollOffset = 0;
     private int overlayScrollRow = 0;
 
-    public record StationEntry(StationMode mode, ItemStack icon, Component name) {}
+    public record StationEntry(StationMode mode, ItemStack icon, Component name, int stationSlot) {
+        public StationEntry(StationMode mode, ItemStack icon, Component name) {
+            this(mode, icon, name, -1);
+        }
+    }
 
     //? >= 26.1 {
     /*public CraftingAccessScreen(CraftingAccessMenu menu, Inventory playerInventory, Component title) {
@@ -138,6 +142,8 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
             } else if (!hasTetra && TetraCompat.isModularWorkbench(s)) {
                 hasTetra = true;
                 list.add(new StationEntry(StationMode.TETRA_WORKBENCH, s, Component.literal("Modular Workbench")));
+            } else {
+                list.add(new StationEntry(StationMode.MODDED, s, s.getHoverName(), i));
             }
         }
         return list;
@@ -212,9 +218,16 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
             if (idx >= 0 && idx < stations.size()) {
                 StationEntry entry = stations.get(idx);
                 if (this.minecraft != null && this.minecraft.gameMode != null) {
-                    this.minecraft.gameMode.handleInventoryButtonClick(
-                            this.menu.containerId, CraftingAccessMenu.STATION_SELECT_BASE + entry.mode.getId()
-                    );
+                    if (entry.mode() == StationMode.MODDED) {
+                        int packetId = isShift
+                                ? CraftingAccessMenu.OPEN_MODDED_GUI_BASE + entry.stationSlot()
+                                : CraftingAccessMenu.MODDED_STATION_SELECT_BASE + entry.stationSlot();
+                        this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, packetId);
+                    } else {
+                        this.minecraft.gameMode.handleInventoryButtonClick(
+                                this.menu.containerId, CraftingAccessMenu.STATION_SELECT_BASE + entry.mode().getId()
+                        );
+                    }
                     this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 }
                 return true;
@@ -268,6 +281,19 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
             }
         }
 
+        if (this.menu.getActiveMode() == StationMode.MODDED) {
+            int moddedSlot = this.menu.getSelectedModdedStationSlot();
+            if (moddedSlot >= 0 && moddedSlot < this.menu.getStationContainer().getContainerSize()) {
+                if (mouseX >= this.leftPos + 8 && mouseX <= this.leftPos + 24 && mouseY >= this.topPos + 92 && mouseY <= this.topPos + 108) {
+                    if (this.minecraft != null && this.minecraft.gameMode != null) {
+                        this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, CraftingAccessMenu.OPEN_MODDED_GUI_BASE + moddedSlot);
+                        this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    }
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -292,7 +318,7 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
         StationMode mode = this.menu.getActiveMode();
 
         // 1. Center Station Interface Overlay
-        if (mode != StationMode.CRAFTING) {
+        if (mode != StationMode.CRAFTING && mode != StationMode.MODDED) {
             graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 7, this.topPos + 105, 0.0f, 0.0f, 150, 64, 256, 256);
 
             if (mode == StationMode.FURNACE) {
@@ -371,6 +397,15 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
                 graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 75, this.topPos + 131, 40.0f, 70.0f, 24, 17, 256, 256);
                 graphics.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.leftPos + 114, this.topPos + 130, 190.0f, 0.0f, 18, 18, 256, 256);
             }
+        } else if (mode == StationMode.MODDED) {
+            int moddedSlot = this.menu.getSelectedModdedStationSlot();
+            if (moddedSlot >= 0 && moddedSlot < this.menu.getStationContainer().getContainerSize()) {
+                ItemStack moddedStack = this.menu.getStationContainer().getItem(moddedSlot);
+                if (!moddedStack.isEmpty()) {
+                    graphics.item(moddedStack, this.leftPos + 8, this.topPos + 92);
+                    graphics.text(this.font, moddedStack.getHoverName(), this.leftPos + 28, this.topPos + 96, 0x404040, false);
+                }
+            }
         }
 
         // 2. Right Station Selector Panel
@@ -387,9 +422,12 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
             int slotY = panelY + 4 + i * 25;
             graphics.blit(RenderPipelines.GUI_TEXTURED, PANEL_TEXTURE, panelX + 4, slotY, 40.0f, 20.0f, 22, 22, 256, 256);
 
-            graphics.item(entry.icon, panelX + 7, slotY + 3);
+            graphics.item(entry.icon(), panelX + 7, slotY + 3);
 
-            if (entry.mode == mode) {
+            boolean isActive = (entry.mode() == StationMode.MODDED)
+                    ? (mode == StationMode.MODDED && this.menu.getSelectedModdedStationSlot() == entry.stationSlot())
+                    : (entry.mode() == mode);
+            if (isActive) {
                 graphics.blit(RenderPipelines.GUI_TEXTURED, PANEL_TEXTURE, panelX + 4, slotY, 40.0f, 50.0f, 22, 22, 256, 256);
             } else if (mouseX >= panelX + 4 && mouseX <= panelX + 26 && mouseY >= slotY && mouseY <= slotY + 22) {
                 graphics.blit(RenderPipelines.GUI_TEXTURED, PANEL_TEXTURE, panelX + 4, slotY, 40.0f, 80.0f, 22, 22, 256, 256);
@@ -443,7 +481,30 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
             int clickedSlot = (int) ((mouseY - (panelY + 4)) / 25);
             int idx = clickedSlot + this.stationScrollOffset;
             if (idx >= 0 && idx < stations.size()) {
-                graphics.setTooltipForNextFrame(stations.get(idx).name, mouseX, mouseY);
+                StationEntry entry = stations.get(idx);
+                if (entry.mode() == StationMode.MODDED) {
+                    List<Component> tooltip = List.of(
+                            entry.name(),
+                            Component.literal("§7Click to select station"),
+                            Component.literal("§eShift-Click to open native GUI")
+                    );
+                    graphics.setTooltipForNextFrame(this.font, tooltip, java.util.Optional.empty(), mouseX, mouseY);
+                } else {
+                    graphics.setTooltipForNextFrame(entry.name(), mouseX, mouseY);
+                }
+            }
+        }
+
+        // Active modded station badge tooltip
+        if (this.menu.getActiveMode() == StationMode.MODDED) {
+            int moddedSlot = this.menu.getSelectedModdedStationSlot();
+            if (moddedSlot >= 0 && moddedSlot < this.menu.getStationContainer().getContainerSize()) {
+                ItemStack moddedStack = this.menu.getStationContainer().getItem(moddedSlot);
+                if (!moddedStack.isEmpty()) {
+                    if (mouseX >= this.leftPos + 8 && mouseX <= this.leftPos + 24 && mouseY >= this.topPos + 92 && mouseY <= this.topPos + 108) {
+                        graphics.setTooltipForNextFrame(this.font, moddedStack, mouseX, mouseY);
+                    }
+                }
             }
         }
 
@@ -493,7 +554,7 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
         StationMode mode = this.menu.getActiveMode();
 
         // 1. Center Station Interface Overlay
-        if (mode != StationMode.CRAFTING) {
+        if (mode != StationMode.CRAFTING && mode != StationMode.MODDED) {
             graphics.blit(WIDGETS_TEXTURE, this.leftPos + 7, this.topPos + 105, 0, 0, 150, 64);
 
             if (mode == StationMode.FURNACE) {
@@ -572,6 +633,15 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
                 graphics.blit(WIDGETS_TEXTURE, this.leftPos + 75, this.topPos + 131, 40, 70, 24, 17);
                 graphics.blit(WIDGETS_TEXTURE, this.leftPos + 114, this.topPos + 130, 190, 0, 18, 18);
             }
+        } else if (mode == StationMode.MODDED) {
+            int moddedSlot = this.menu.getSelectedModdedStationSlot();
+            if (moddedSlot >= 0 && moddedSlot < this.menu.getStationContainer().getContainerSize()) {
+                ItemStack moddedStack = this.menu.getStationContainer().getItem(moddedSlot);
+                if (!moddedStack.isEmpty()) {
+                    graphics.renderItem(moddedStack, this.leftPos + 8, this.topPos + 92);
+                    graphics.drawString(this.font, moddedStack.getHoverName(), this.leftPos + 28, this.topPos + 96, 0x404040, false);
+                }
+            }
         }
 
         // 2. Right Station Selector Panel
@@ -588,9 +658,12 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
             int slotY = panelY + 4 + i * 25;
             graphics.blit(PANEL_TEXTURE, panelX + 4, slotY, 40, 20, 22, 22);
 
-            graphics.renderItem(entry.icon, panelX + 7, slotY + 3);
+            graphics.renderItem(entry.icon(), panelX + 7, slotY + 3);
 
-            if (entry.mode == mode) {
+            boolean isActive = (entry.mode() == StationMode.MODDED)
+                    ? (mode == StationMode.MODDED && this.menu.getSelectedModdedStationSlot() == entry.stationSlot())
+                    : (entry.mode() == mode);
+            if (isActive) {
                 graphics.blit(PANEL_TEXTURE, panelX + 4, slotY, 40, 50, 22, 22);
             } else if (mouseX >= panelX + 4 && mouseX <= panelX + 26 && mouseY >= slotY && mouseY <= slotY + 22) {
                 graphics.blit(PANEL_TEXTURE, panelX + 4, slotY, 40, 80, 22, 22);
@@ -645,7 +718,30 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
             int clickedSlot = (int) ((mouseY - (panelY + 4)) / 25);
             int idx = clickedSlot + this.stationScrollOffset;
             if (idx >= 0 && idx < stations.size()) {
-                graphics.renderTooltip(this.font, stations.get(idx).name, mouseX, mouseY);
+                StationEntry entry = stations.get(idx);
+                if (entry.mode() == StationMode.MODDED) {
+                    List<Component> tooltip = List.of(
+                            entry.name(),
+                            Component.literal("§7Click to select station"),
+                            Component.literal("§eShift-Click to open native GUI")
+                    );
+                    graphics.renderComponentTooltip(this.font, tooltip, mouseX, mouseY);
+                } else {
+                    graphics.renderTooltip(this.font, entry.name(), mouseX, mouseY);
+                }
+            }
+        }
+
+        // Active modded station badge tooltip
+        if (this.menu.getActiveMode() == StationMode.MODDED) {
+            int moddedSlot = this.menu.getSelectedModdedStationSlot();
+            if (moddedSlot >= 0 && moddedSlot < this.menu.getStationContainer().getContainerSize()) {
+                ItemStack moddedStack = this.menu.getStationContainer().getItem(moddedSlot);
+                if (!moddedStack.isEmpty()) {
+                    if (mouseX >= this.leftPos + 8 && mouseX <= this.leftPos + 24 && mouseY >= this.topPos + 92 && mouseY <= this.topPos + 108) {
+                        graphics.renderTooltip(this.font, moddedStack, mouseX, mouseY);
+                    }
+                }
             }
         }
 

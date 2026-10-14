@@ -17,7 +17,8 @@ public enum StationMode {
     APOTH_REFORGING(10, "Reforging Table", Items.ANVIL),
     APOTH_SALVAGING(11, "Salvaging Table", Items.SMITHING_TABLE),
     APOTH_GEM_CUTTING(12, "Gem Cutting Table", Items.STONECUTTER),
-    TETRA_WORKBENCH(13, "Modular Workbench", Items.CRAFTING_TABLE);
+    TETRA_WORKBENCH(13, "Modular Workbench", Items.CRAFTING_TABLE),
+    MODDED(14, "Modded Station", Items.AIR);
 
     private final int id;
     private final String title;
