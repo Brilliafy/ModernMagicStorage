@@ -48,14 +48,85 @@ public class BlockStorageHeart extends BaseEntityBlock {
         return new StorageHeartBlockEntity(pos, state);
     }
 
+    @Override
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+        super.onPlace(state, level, pos, oldState, isMoving);
+        com.brilliafy.magicstorage.storage.NetworkLocator.markNetworkDirty(level, pos);
+    }
+
+    //? >= 26.1 {
+    /*@Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player.isShiftKeyDown() && stack.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                remote.bindToNetwork(stack, pos, level.dimension().location().toString());
+                ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound", pos.getX(), pos.getY(), pos.getZ()), true);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (player.isShiftKeyDown() && StationManager.isAllowedStation(stack)) {
+            if (!level.isClientSide()) {
+                BlockEntity be = level.getBlockEntity(pos);
+                if (be instanceof StorageHeartBlockEntity heart) {
+                    ItemStack toInsert = stack.copy();
+                    toInsert.setCount(1);
+                    if (heart.addStation(toInsert)) {
+                        stack.shrink(1);
+                        ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.station_inserted", toInsert.getHoverName()), true);
+                    } else {
+                        ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.stations_full"), true);
+                    }
+                }
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return super.useItemOn(stack, state, level, pos, player, hand, hit);
+    }
+    *///?} < 26.1 && > 1.20.1 {
+    @Override
+    protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player.isShiftKeyDown() && stack.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                remote.bindToNetwork(stack, pos, level.dimension().location().toString());
+                ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound", pos.getX(), pos.getY(), pos.getZ()), true);
+            }
+            return net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide());
+        }
+        if (player.isShiftKeyDown() && StationManager.isAllowedStation(stack)) {
+            if (!level.isClientSide()) {
+                BlockEntity be = level.getBlockEntity(pos);
+                if (be instanceof StorageHeartBlockEntity heart) {
+                    ItemStack toInsert = stack.copy();
+                    toInsert.setCount(1);
+                    if (heart.addStation(toInsert)) {
+                        stack.shrink(1);
+                        ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.station_inserted", toInsert.getHoverName()), true);
+                    } else {
+                        ItemHelper.displayClientMessage(player, Component.translatable("message.magicstorage.stations_full"), true);
+                    }
+                }
+            }
+            return net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide());
+        }
+        return net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+    //?}
+
     //? > 1.20.1 {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+        if (player.isShiftKeyDown() && held.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                remote.bindToNetwork(held, pos, level.dimension().location().toString());
+                ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound", pos.getX(), pos.getY(), pos.getZ()), true);
+            }
+            return Constants.success(level);
+        }
         if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof StorageHeartBlockEntity heart) {
                 if (player.isShiftKeyDown()) {
-                    ItemStack held = player.getMainHandItem();
                     if (StationManager.isAllowedStation(held)) {
                         ItemStack toInsert = held.copy();
                         toInsert.setCount(1);
@@ -92,10 +163,17 @@ public class BlockStorageHeart extends BaseEntityBlock {
     //?} <= 1.20.1 {
     /*@Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        ItemStack held = player.getItemInHand(hand);
+        if (player.isShiftKeyDown() && held.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                remote.bindToNetwork(held, pos, level.dimension().location().toString());
+                ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound", pos.getX(), pos.getY(), pos.getZ()), true);
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
         if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof StorageHeartBlockEntity heart) {
-                ItemStack held = player.getItemInHand(hand);
                 if (player.isShiftKeyDown()) {
                     if (StationManager.isAllowedStation(held)) {
                         ItemStack toInsert = held.copy();

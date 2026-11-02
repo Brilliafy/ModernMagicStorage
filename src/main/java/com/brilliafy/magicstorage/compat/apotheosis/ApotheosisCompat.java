@@ -50,12 +50,25 @@ public class ApotheosisCompat {
     public static boolean isAffixItem(ItemStack stack) {
         if (!isLoaded() || stack.isEmpty()) return false;
         try {
-            Class<?> affixHelper = Class.forName("dev.shadowsoffire.apotheosis.adventure.affix.AffixHelper");
-            Method hasAffixes = affixHelper.getMethod("hasAffixes", ItemStack.class);
-            return (boolean) hasAffixes.invoke(null, stack);
-        } catch (Throwable t) {
-            ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
-            return MOD_ID.equals(key.getNamespace());
+            Class<?> affixHelper = findClass("affix.AffixHelper");
+            if (affixHelper != null) {
+                Method hasAffixes = affixHelper.getMethod("hasAffixes", ItemStack.class);
+                return (boolean) hasAffixes.invoke(null, stack);
+            }
+        } catch (Throwable ignored) {}
+        ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return MOD_ID.equals(key.getNamespace());
+    }
+
+    private static Class<?> findClass(String subPath) {
+        try {
+            return Class.forName("dev.shadowsoffire.apotheosis." + subPath);
+        } catch (ClassNotFoundException e) {
+            try {
+                return Class.forName("dev.shadowsoffire.apotheosis.adventure." + subPath);
+            } catch (ClassNotFoundException ex) {
+                return null;
+            }
         }
     }
 
@@ -89,13 +102,15 @@ public class ApotheosisCompat {
     public static ItemStack computeSalvageResult(ItemStack stack, Level level) {
         if (!isLoaded() || stack.isEmpty()) return ItemStack.EMPTY;
         try {
-            Class<?> salvagingMenu = Class.forName("dev.shadowsoffire.apotheosis.adventure.affix.salvaging.SalvagingMenu");
-            Method salvageItem = salvagingMenu.getMethod("salvageItem", Level.class, ItemStack.class);
-            @SuppressWarnings("unchecked")
-            List<ItemStack> results = (List<ItemStack>) salvageItem.invoke(null, level, stack);
-            if (results != null && !results.isEmpty()) {
-                for (ItemStack res : results) {
-                    if (!res.isEmpty()) return res.copy();
+            Class<?> salvagingMenu = findClass("affix.salvaging.SalvagingMenu");
+            if (salvagingMenu != null) {
+                Method salvageItem = salvagingMenu.getMethod("salvageItem", Level.class, ItemStack.class);
+                @SuppressWarnings("unchecked")
+                List<ItemStack> results = (List<ItemStack>) salvageItem.invoke(null, level, stack);
+                if (results != null && !results.isEmpty()) {
+                    for (ItemStack res : results) {
+                        if (!res.isEmpty()) return res.copy();
+                    }
                 }
             }
         } catch (Throwable ignored) {}
@@ -111,20 +126,24 @@ public class ApotheosisCompat {
     public static ItemStack computeReforgingResult(ItemStack gear, ItemStack material, ItemStack sigilOrDust, Level level, Player player) {
         if (!isLoaded() || gear.isEmpty() || material.isEmpty()) return ItemStack.EMPTY;
         try {
-            Class<?> rarityRegistry = Class.forName("dev.shadowsoffire.apotheosis.adventure.loot.RarityRegistry");
-            Method getMatRarity = rarityRegistry.getMethod("getMaterialRarity", net.minecraft.world.item.Item.class);
-            Object dynamicHolder = getMatRarity.invoke(null, material.getItem());
-            if (dynamicHolder == null) return ItemStack.EMPTY;
+            Class<?> rarityRegistry = findClass("loot.RarityRegistry");
+            if (rarityRegistry != null) {
+                Method getMatRarity = rarityRegistry.getMethod("getMaterialRarity", net.minecraft.world.item.Item.class);
+                Object dynamicHolder = getMatRarity.invoke(null, material.getItem());
+                if (dynamicHolder == null) return ItemStack.EMPTY;
 
-            Method getHolderVal = dynamicHolder.getClass().getMethod("get");
-            Object lootRarity = getHolderVal.invoke(dynamicHolder);
-            if (lootRarity == null) return ItemStack.EMPTY;
+                Method getHolderVal = dynamicHolder.getClass().getMethod("get");
+                Object lootRarity = getHolderVal.invoke(dynamicHolder);
+                if (lootRarity == null) return ItemStack.EMPTY;
 
-            Class<?> lootController = Class.forName("dev.shadowsoffire.apotheosis.adventure.loot.LootController");
-            Method createLootItem = lootController.getMethod("createLootItem", ItemStack.class, lootRarity.getClass(), RandomSource.class);
-            ItemStack result = (ItemStack) createLootItem.invoke(null, gear.copy(), lootRarity, level.getRandom());
-            if (result != null && !result.isEmpty()) {
-                return result;
+                Class<?> lootController = findClass("loot.LootController");
+                if (lootController != null) {
+                    Method createLootItem = lootController.getMethod("createLootItem", ItemStack.class, lootRarity.getClass(), RandomSource.class);
+                    ItemStack result = (ItemStack) createLootItem.invoke(null, gear.copy(), lootRarity, level.getRandom());
+                    if (result != null && !result.isEmpty()) {
+                        return result;
+                    }
+                }
             }
         } catch (Throwable ignored) {}
 
@@ -137,24 +156,26 @@ public class ApotheosisCompat {
     public static ItemStack computeGemCuttingResult(ItemStack gem, ItemStack dust, ItemStack duplicateOrMat, Level level) {
         if (!isLoaded() || gem.isEmpty() || dust.isEmpty()) return ItemStack.EMPTY;
         try {
-            Class<?> affixHelper = Class.forName("dev.shadowsoffire.apotheosis.adventure.affix.AffixHelper");
-            Method getRarity = affixHelper.getMethod("getRarity", ItemStack.class);
-            Object currentRarityHolder = getRarity.invoke(null, gem);
-            if (currentRarityHolder == null) return ItemStack.EMPTY;
+            Class<?> affixHelper = findClass("affix.AffixHelper");
+            Class<?> rarityRegistry = findClass("loot.RarityRegistry");
+            if (affixHelper != null && rarityRegistry != null) {
+                Method getRarity = affixHelper.getMethod("getRarity", ItemStack.class);
+                Object currentRarityHolder = getRarity.invoke(null, gem);
+                if (currentRarityHolder == null) return ItemStack.EMPTY;
 
-            Class<?> rarityRegistry = Class.forName("dev.shadowsoffire.apotheosis.adventure.loot.RarityRegistry");
-            Method nextMethod = rarityRegistry.getMethod("next", currentRarityHolder.getClass().getInterfaces()[0]);
-            Object nextRarityHolder = nextMethod.invoke(null, currentRarityHolder);
-            if (nextRarityHolder == null) return ItemStack.EMPTY;
+                Method nextMethod = rarityRegistry.getMethod("next", currentRarityHolder.getClass().getInterfaces()[0]);
+                Object nextRarityHolder = nextMethod.invoke(null, currentRarityHolder);
+                if (nextRarityHolder == null) return ItemStack.EMPTY;
 
-            Method getVal = nextRarityHolder.getClass().getMethod("get");
-            Object nextRarity = getVal.invoke(nextRarityHolder);
-            if (nextRarity == null) return ItemStack.EMPTY;
+                Method getVal = nextRarityHolder.getClass().getMethod("get");
+                Object nextRarity = getVal.invoke(nextRarityHolder);
+                if (nextRarity == null) return ItemStack.EMPTY;
 
-            ItemStack upgraded = gem.copy();
-            Method setRarity = affixHelper.getMethod("setRarity", ItemStack.class, nextRarity.getClass());
-            setRarity.invoke(null, upgraded, nextRarity);
-            return upgraded;
+                ItemStack upgraded = gem.copy();
+                Method setRarity = affixHelper.getMethod("setRarity", ItemStack.class, nextRarity.getClass());
+                setRarity.invoke(null, upgraded, nextRarity);
+                return upgraded;
+            }
         } catch (Throwable ignored) {}
 
         return ItemStack.EMPTY;

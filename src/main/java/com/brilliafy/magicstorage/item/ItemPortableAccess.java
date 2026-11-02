@@ -47,25 +47,34 @@ public class ItemPortableAccess extends Item {
         ItemStack stack = context.getItemInHand();
 
         if (player != null && player.isShiftKeyDown()) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof StorageHeartBlockEntity) {
+            StorageHeartBlockEntity heart = com.brilliafy.magicstorage.storage.NetworkLocator.findConnectedHeart(level, pos);
+            if (heart != null) {
                 if (!level.isClientSide()) {
-                    bindToNetwork(stack, pos, level.dimension().location().toString());
-                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound"), true);
+                    BlockPos heartPos = heart.getBlockPos();
+                    bindToNetwork(stack, heartPos, level.dimension().location().toString());
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(
+                            player,
+                            Component.translatable("gui.magicstorage.remote_bound", heartPos.getX(), heartPos.getY(), heartPos.getZ()),
+                            true
+                    );
                 }
                 return com.brilliafy.magicstorage.Constants.success(level);
-            } else if (level.getBlockState(pos).getBlock() instanceof BlockRemoteAccess) {
-                if (!level.isClientSide()) {
-                    if (be instanceof RemoteAccessBlockEntity remote) {
-                        BlockPos heartPos = remote.getHeartPos();
-                        if (heartPos != null) {
-                            bindToNetwork(stack, heartPos, level.dimension().location().toString());
-                            com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_bound"), true);
-                            return com.brilliafy.magicstorage.Constants.success(level);
-                        }
+            } else {
+                var block = level.getBlockState(pos).getBlock();
+                if (block instanceof com.brilliafy.magicstorage.block.BlockStorageAccess
+                        || block instanceof com.brilliafy.magicstorage.block.BlockCraftingAccess
+                        || block instanceof com.brilliafy.magicstorage.block.BlockStorageUnit
+                        || block instanceof com.brilliafy.magicstorage.block.BlockRemoteAccess
+                        || block instanceof com.brilliafy.magicstorage.block.BlockStorageHeart) {
+                    if (!level.isClientSide()) {
+                        com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(
+                                player,
+                                Component.translatable("gui.magicstorage.not_connected"),
+                                true
+                        );
                     }
+                    return com.brilliafy.magicstorage.Constants.success(level);
                 }
-                return com.brilliafy.magicstorage.Constants.success(level);
             }
         }
         return super.useOn(context);
@@ -149,5 +158,47 @@ public class ItemPortableAccess extends Item {
         }
         com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, Component.translatable("gui.magicstorage.remote_heart_missing"), true);
         return null;
+    }
+
+    //? >= 26.1 {
+    /*@Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        addAccessTooltip(stack, tooltip::accept);
+    }
+    *///?} < 26.1 && > 1.20.1 {
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, java.util.List<Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        addAccessTooltip(stack, tooltip::add);
+    }
+    //?} <= 1.20.1 {
+    /*@Override
+    public void appendHoverText(ItemStack stack, @org.jetbrains.annotations.Nullable Level level, java.util.List<Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        addAccessTooltip(stack, tooltip::add);
+    }
+    *///?}
+
+    private void addAccessTooltip(ItemStack stack, java.util.function.Consumer<Component> adder) {
+        var tag = com.brilliafy.magicstorage.util.ItemHelper.getRemoteTag(stack);
+        if (tag != null && tag.contains("HeartX")) {
+            int x = com.brilliafy.magicstorage.util.ItemHelper.getInt(tag, "HeartX");
+            int y = com.brilliafy.magicstorage.util.ItemHelper.getInt(tag, "HeartY");
+            int z = com.brilliafy.magicstorage.util.ItemHelper.getInt(tag, "HeartZ");
+            String dim = com.brilliafy.magicstorage.util.ItemHelper.getString(tag, "HeartDim");
+            adder.accept(Component.translatable("tooltip.magicstorage.remote_bound_to", x, y, z).withStyle(net.minecraft.ChatFormatting.GREEN));
+            if (!dim.isEmpty()) {
+                adder.accept(Component.translatable("tooltip.magicstorage.remote_dimension", dim).withStyle(net.minecraft.ChatFormatting.GRAY));
+            }
+        } else {
+            adder.accept(Component.translatable("tooltip.magicstorage.remote_unbound").withStyle(net.minecraft.ChatFormatting.RED));
+            adder.accept(Component.translatable("tooltip.magicstorage.remote_bind_hint").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        }
+
+        if (crossDimensional) {
+            adder.accept(Component.translatable("tooltip.magicstorage.remote_cross_dimensional").withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
+        } else if (maxRange > 0) {
+            adder.accept(Component.translatable("tooltip.magicstorage.remote_range", (int) maxRange).withStyle(net.minecraft.ChatFormatting.AQUA));
+        } else {
+            adder.accept(Component.translatable("tooltip.magicstorage.remote_range_infinite").withStyle(net.minecraft.ChatFormatting.AQUA));
+        }
     }
 }

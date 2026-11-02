@@ -11,13 +11,13 @@ stonecutter {
 }
 
 platform {
-	loader = "neoforge"
+	loader = "neoforge120"
 	dependencies {
 		required("minecraft") {
 			forgeLikeVersionRange = prop("deps.minecraft")
 		}
-		required("neoforge") {
-			forgeLikeVersionRange.set("[${prop("deps.neoforge")},)")
+		required("forge") {
+			forgeLikeVersionRange.set("[47.1.0,)")
 		}
 		optional("jei") { slug("jei") }
 		optional("fairexperience") { slug("fair-experience", "fair-experience") }

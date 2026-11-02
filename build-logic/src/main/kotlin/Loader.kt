@@ -86,7 +86,7 @@ sealed class Loader(val id: String) {
 						ForgeDependency(
 							modId = it.modid.get(),
 							side = it.environment.get().uppercase(Locale.ROOT),
-							versionRange = it.forgeLikeVersionRange.get(),
+							versionRange = it.forgeLikeVersionRange.get().ifBlank { "[0,)" },
 							mandatory = type == "required",
 							type = type
 						)

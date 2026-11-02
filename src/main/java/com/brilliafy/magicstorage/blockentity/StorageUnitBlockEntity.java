@@ -28,12 +28,12 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
     private boolean suppressDrop = false;
 
     public StorageUnitBlockEntity(BlockPos pos, BlockState state) {
-        this(pos, state, state.getBlock() instanceof BlockStorageUnit u ? u.getCapacity() : 36);
+        this(pos, state, state.getBlock() instanceof BlockStorageUnit u ? u.getCapacity() : 54);
     }
 
     public StorageUnitBlockEntity(BlockPos pos, BlockState state, int capacity) {
         super(ModBlockEntities.STORAGE_UNIT, pos, state);
-        this.capacity = capacity > 0 ? capacity : 36;
+        this.capacity = capacity > 0 ? capacity : 54;
         this.items = NonNullList.withSize(this.capacity, ItemStack.EMPTY);
     }
 

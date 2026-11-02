@@ -30,6 +30,7 @@ stonecutter parameters {
 tasks.register<Copy>("collectDebugJars") {
 	group = "build"
 	description = "Collects all compiled mod jars into debug-jars/ for local testing without publishing"
+	dependsOn(subprojects.map { it.tasks.matching { t -> t.name == "reobfJar" || t.name == "remapJar" || t.name == "jar" } })
 	from("versions") {
 		include("*/build/libs/*.jar")
 		exclude { it.file.name.contains("sources") || it.file.name.contains("javadoc") }

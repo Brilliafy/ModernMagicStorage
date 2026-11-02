@@ -1,5 +1,7 @@
 package com.brilliafy.magicstorage.block;
 
+import com.brilliafy.magicstorage.Constants;
+import com.brilliafy.magicstorage.blockentity.StorageHeartBlockEntity;
 import com.brilliafy.magicstorage.blockentity.StorageUnitBlockEntity;
 import com.brilliafy.magicstorage.item.ItemStorageUpgrade;
 import com.brilliafy.magicstorage.storage.NetworkLocator;
@@ -19,10 +21,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockStorageUnit extends BaseEntityBlock {
-    public static final int[] TIER_SLOT_COUNTS = {36, 54, 54, 90, 135, 180, 252, 360};
+    public static final int[] TIER_SLOT_COUNTS = {54, 54, 54, 90, 135, 180, 252, 360};
 
     //? > 1.20.1 && < 26.1 {
-    public static final com.mojang.serialization.MapCodec<BlockStorageUnit> CODEC = simpleCodec(props -> new BlockStorageUnit(0, 36, props));
+    public static final com.mojang.serialization.MapCodec<BlockStorageUnit> CODEC = simpleCodec(props -> new BlockStorageUnit(0, 54, props));
 
     @Override
     protected com.mojang.serialization.MapCodec<? extends BaseEntityBlock> codec() {
@@ -89,6 +91,18 @@ public class BlockStorageUnit extends BaseEntityBlock {
     //? >= 26.1 {
     /*@Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player.isShiftKeyDown() && stack.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                StorageHeartBlockEntity heart = NetworkLocator.findConnectedHeart(level, pos);
+                if (heart != null) {
+                    remote.bindToNetwork(stack, heart.getBlockPos(), level.dimension().location().toString());
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.remote_bound", heart.getBlockPos().getX(), heart.getBlockPos().getY(), heart.getBlockPos().getZ()), true);
+                } else {
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.not_connected"), true);
+                }
+            }
+            return InteractionResult.SUCCESS;
+        }
         if (stack.getItem() instanceof ItemStorageUpgrade upgrade) {
             if (upgrade.getTargetTier() > this.tier) {
                 if (!level.isClientSide()) {
@@ -109,6 +123,19 @@ public class BlockStorageUnit extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+        if (player.isShiftKeyDown() && held.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                StorageHeartBlockEntity heart = NetworkLocator.findConnectedHeart(level, pos);
+                if (heart != null) {
+                    remote.bindToNetwork(held, heart.getBlockPos(), level.dimension().location().toString());
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.remote_bound", heart.getBlockPos().getX(), heart.getBlockPos().getY(), heart.getBlockPos().getZ()), true);
+                } else {
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.not_connected"), true);
+                }
+            }
+            return InteractionResult.SUCCESS;
+        }
         if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof StorageUnitBlockEntity unit) {
@@ -120,9 +147,21 @@ public class BlockStorageUnit extends BaseEntityBlock {
     *///?} < 26.1 && > 1.20.1 {
     @Override
     protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player.isShiftKeyDown() && stack.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                StorageHeartBlockEntity heart = NetworkLocator.findConnectedHeart(level, pos);
+                if (heart != null) {
+                    remote.bindToNetwork(stack, heart.getBlockPos(), level.dimension().location().toString());
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.remote_bound", heart.getBlockPos().getX(), heart.getBlockPos().getY(), heart.getBlockPos().getZ()), true);
+                } else {
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.not_connected"), true);
+                }
+            }
+            return net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide());
+        }
         if (stack.getItem() instanceof ItemStorageUpgrade upgrade) {
             if (upgrade.getTargetTier() > this.tier) {
-                if (!level.isClientSide) {
+                if (!level.isClientSide()) {
                     BlockEntity be = level.getBlockEntity(pos);
                     if (be instanceof StorageUnitBlockEntity unit) {
                         upgrade.applyUpgrade(level, pos, unit);
@@ -132,7 +171,7 @@ public class BlockStorageUnit extends BaseEntityBlock {
                         level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
                     }
                 }
-                return net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide);
+                return net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide());
             }
         }
         return super.useItemOn(stack, state, level, pos, player, hand, hit);
@@ -140,21 +179,46 @@ public class BlockStorageUnit extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide) {
+        ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+        if (player.isShiftKeyDown() && held.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                StorageHeartBlockEntity heart = NetworkLocator.findConnectedHeart(level, pos);
+                if (heart != null) {
+                    remote.bindToNetwork(held, heart.getBlockPos(), level.dimension().location().toString());
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.remote_bound", heart.getBlockPos().getX(), heart.getBlockPos().getY(), heart.getBlockPos().getZ()), true);
+                } else {
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.not_connected"), true);
+                }
+            }
+            return Constants.success(level);
+        }
+        if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof StorageUnitBlockEntity unit) {
                 player.openMenu(unit);
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return Constants.success(level);
     }
     //?} <= 1.20.1 {
     /*@Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack stack = player.getItemInHand(hand);
+        if (player.isShiftKeyDown() && stack.getItem() instanceof com.brilliafy.magicstorage.item.ItemPortableAccess remote) {
+            if (!level.isClientSide()) {
+                StorageHeartBlockEntity heart = NetworkLocator.findConnectedHeart(level, pos);
+                if (heart != null) {
+                    remote.bindToNetwork(stack, heart.getBlockPos(), level.dimension().location().toString());
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.remote_bound", heart.getBlockPos().getX(), heart.getBlockPos().getY(), heart.getBlockPos().getZ()), true);
+                } else {
+                    com.brilliafy.magicstorage.util.ItemHelper.displayClientMessage(player, net.minecraft.network.chat.Component.translatable("gui.magicstorage.not_connected"), true);
+                }
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
         if (stack.getItem() instanceof ItemStorageUpgrade upgrade) {
             if (upgrade.getTargetTier() > this.tier) {
-                if (!level.isClientSide) {
+                if (!level.isClientSide()) {
                     BlockEntity be = level.getBlockEntity(pos);
                     if (be instanceof StorageUnitBlockEntity unit) {
                         upgrade.applyUpgrade(level, pos, unit);
@@ -164,16 +228,16 @@ public class BlockStorageUnit extends BaseEntityBlock {
                         level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
                     }
                 }
-                return InteractionResult.sidedSuccess(level.isClientSide);
+                return InteractionResult.sidedSuccess(level.isClientSide());
             }
         }
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof StorageUnitBlockEntity unit) {
                 player.openMenu(unit);
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
     *///?}
 }

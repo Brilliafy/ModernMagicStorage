@@ -18,13 +18,15 @@ public class StorageUnitScreen extends AbstractContainerScreen<StorageUnitMenu> 
 
     //? >= 26.1 {
     /*public StorageUnitScreen(StorageUnitMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title, 176, 166);
+        super(menu, playerInventory, title, 176, 222);
+        this.inventoryLabelY = this.imageHeight - 94;
     }
     *///?} < 26.1 {
     public StorageUnitScreen(StorageUnitMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
-        this.imageHeight = 166;
+        this.imageHeight = 222;
+        this.inventoryLabelY = this.imageHeight - 94;
     }
     //?}
 
@@ -38,11 +40,6 @@ public class StorageUnitScreen extends AbstractContainerScreen<StorageUnitMenu> 
     @Override
     public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractContents(graphics, mouseX, mouseY, partialTick);
-
-        if (menu.getUnit() != null) {
-            String info = menu.getUnit().getStoredCount() + " / " + menu.getUnit().getCapacity() + " Items";
-            graphics.text(this.font, info, this.leftPos + 40, this.topPos + 35, 0x404040, false);
-        }
     }
     *///?} < 26.1 {
     @Override
@@ -53,12 +50,6 @@ public class StorageUnitScreen extends AbstractContainerScreen<StorageUnitMenu> 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-
-        if (menu.getUnit() != null) {
-            String info = menu.getUnit().getStoredCount() + " / " + menu.getUnit().getCapacity() + " Items";
-            graphics.drawString(this.font, info, this.leftPos + 40, this.topPos + 35, 0x404040, false);
-        }
-
         this.renderTooltip(graphics, mouseX, mouseY);
     }
     //?}

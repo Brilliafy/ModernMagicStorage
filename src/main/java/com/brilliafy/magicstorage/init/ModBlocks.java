@@ -38,7 +38,7 @@ public class ModBlocks {
 
     // 8 Storage Unit tiers
     public static final Block STORAGE_UNIT_BASIC = register("storage_unit_basic", new BlockStorageUnit(
-            0, 36, BlockBehaviour.Properties.of().strength(2.5f, 5.0f).sound(SoundType.METAL)));
+            0, 54, BlockBehaviour.Properties.of().strength(2.5f, 5.0f).sound(SoundType.METAL)));
 
     public static final Block STORAGE_UNIT_CRIMTANE = register("storage_unit_crimtane", new BlockStorageUnit(
             1, 54, BlockBehaviour.Properties.of().strength(3.0f, 6.0f).sound(SoundType.METAL)));

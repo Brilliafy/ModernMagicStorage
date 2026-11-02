@@ -47,12 +47,14 @@ public class CraftingAccessScreen extends AbstractContainerScreen<CraftingAccess
     //? >= 26.1 {
     /*public CraftingAccessScreen(CraftingAccessMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title, 206, 256);
+        this.inventoryLabelY = 162;
     }
     *///?} < 26.1 {
     public CraftingAccessScreen(CraftingAccessMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 206;
         this.imageHeight = 256;
+        this.inventoryLabelY = 162;
     }
     //?}
 

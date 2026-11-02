@@ -249,8 +249,11 @@ public class CraftingAccessMenu extends StorageAccessMenu {
                         net.minecraft.world.level.block.entity.BlockEntity be = entityBlock.newBlockEntity(
                                 player.blockPosition(), block.defaultBlockState()
                         );
-                        if (be instanceof net.minecraft.world.MenuProvider mp) {
-                            provider = mp;
+                        if (be != null) {
+                            be.setLevel(level);
+                            if (be instanceof net.minecraft.world.MenuProvider mp) {
+                                provider = mp;
+                            }
                         }
                     } catch (Throwable ignored) {}
                 }
@@ -498,6 +501,9 @@ public class CraftingAccessMenu extends StorageAccessMenu {
     }
 
     protected void updateCraftingResult() {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
         if (activeMode != StationMode.CRAFTING && activeMode != StationMode.MODDED) {
             ItemStack stationRes = StationRecipeManager.computeStationResultForMode(
                     activeMode, craftSlots, level, heart != null ? heart.getStationManager() : null, player, selectedRecipeIndex

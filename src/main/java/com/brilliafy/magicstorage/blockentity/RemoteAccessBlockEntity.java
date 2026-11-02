@@ -11,11 +11,37 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.HolderLookup;
 //?}
 
-public class RemoteAccessBlockEntity extends BlockEntity {
+public class RemoteAccessBlockEntity extends BlockEntity implements net.minecraft.world.MenuProvider {
     private BlockPos boundHeartPos = null;
 
     public RemoteAccessBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.REMOTE_ACCESS, pos, state);
+    }
+
+    public StorageHeartBlockEntity getConnectedHeart() {
+        BlockPos hPos = getHeartPos();
+        if (hPos != null && level != null) {
+            BlockEntity be = level.getBlockEntity(hPos);
+            if (be instanceof StorageHeartBlockEntity heart) {
+                return heart;
+            }
+        }
+        return NetworkLocator.findConnectedHeart(level, worldPosition);
+    }
+
+    @Override
+    public net.minecraft.network.chat.Component getDisplayName() {
+        return net.minecraft.network.chat.Component.translatable("block.magicstorage.remote_access");
+    }
+
+    @org.jetbrains.annotations.Nullable
+    @Override
+    public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int containerId, net.minecraft.world.entity.player.Inventory playerInventory, net.minecraft.world.entity.player.Player player) {
+        StorageHeartBlockEntity heart = getConnectedHeart();
+        if (heart != null) {
+            return new com.brilliafy.magicstorage.menu.StorageAccessMenu(containerId, playerInventory, heart);
+        }
+        return null;
     }
 
     public BlockPos getHeartPos() {
