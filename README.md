@@ -1,3 +1,9 @@
+> [!WARNING]
+> ### PROJECT UNMAINTAINED / ON INDEFINITE HIATUS — INCOMPLETE PORT
+> **Notice: This port is incomplete, non-functional, and not fully ported.**
+> Development has ceased and this project is on indefinite hiatus. No future updates, fixes, or stabilization patches are planned.
+
+
 [![Modrinth](https://img.shields.io/badge/Modrinth-3SFNKJXS-00AF5C?style=for-the-badge&logo=modrinth&logoColor=white)](https://modrinth.com/mod/magic-storage-network)
 [![CurseForge](https://img.shields.io/badge/CurseForge-1629983-F44336?style=for-the-badge&logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/magic-storage-network)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
