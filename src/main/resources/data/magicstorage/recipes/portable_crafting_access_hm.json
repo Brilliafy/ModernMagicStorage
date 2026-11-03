@@ -13,10 +13,10 @@
       "item": "magicstorage:ingot_hallowed"
     },
     "C": {
-      "item": "minecraft:chorus_fruit_popped"
+      "item": "minecraft:popped_chorus_fruit"
     },
     "P": {
-      "item": "magicstorage:portable_crafting_access"
+      "item": "magicstorage:portable_crafting_access_prehm"
     },
     "D": {
       "item": "minecraft:diamond_block"
@@ -26,8 +26,7 @@
     }
   },
   "result": {
-    "item": "magicstorage:portable_crafting_access",
-    "data": 1,
+    "item": "magicstorage:portable_crafting_access_hm",
     "count": 1
   }
 }

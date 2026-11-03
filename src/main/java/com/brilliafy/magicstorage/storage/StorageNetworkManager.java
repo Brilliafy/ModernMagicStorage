@@ -6,9 +6,29 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+//? > 1.20.1 {
+import net.minecraft.core.component.DataComponentMap;
+//?} <= 1.20.1 {
+/*import net.minecraft.nbt.CompoundTag;
+*///?}
+
 import java.util.*;
 
 public class StorageNetworkManager {
+
+    //? > 1.20.1 {
+    private record ItemKey(net.minecraft.world.item.Item item, DataComponentMap components) {
+        public static ItemKey of(ItemStack stack) {
+            return new ItemKey(stack.getItem(), stack.getComponents());
+        }
+    }
+    //?} <= 1.20.1 {
+    /*private record ItemKey(net.minecraft.world.item.Item item, CompoundTag tag) {
+        public static ItemKey of(ItemStack stack) {
+            return new ItemKey(stack.getItem(), stack.getTag());
+        }
+    }
+    *///?}
 
     public enum SortOrder {
         QUANTITY,
@@ -17,12 +37,12 @@ public class StorageNetworkManager {
     }
 
     public static List<ItemStack> aggregateItems(List<StorageUnitBlockEntity> units) {
-        Map<String, ItemStack> aggregated = new LinkedHashMap<>();
+        Map<ItemKey, ItemStack> aggregated = new LinkedHashMap<>();
 
         for (StorageUnitBlockEntity unit : units) {
             for (ItemStack stack : unit.getStoredItems()) {
                 if (stack.isEmpty()) continue;
-                String key = getItemKey(stack);
+                ItemKey key = ItemKey.of(stack);
                 if (aggregated.containsKey(key)) {
                     aggregated.get(key).grow(stack.getCount());
                 } else {
@@ -36,9 +56,10 @@ public class StorageNetworkManager {
 
     public static void sortItems(List<ItemStack> items, SortOrder order, boolean ascending) {
         Comparator<ItemStack> comparator = switch (order) {
-            case QUANTITY -> Comparator.comparingInt(ItemStack::getCount);
-            case NAME -> Comparator.comparing(s -> s.getHoverName().getString());
-            case MOD -> Comparator.comparing(s -> BuiltInRegistries.ITEM.getKey(s.getItem()).getNamespace());
+            case QUANTITY -> Comparator.comparingInt(ItemStack::getCount).thenComparing(s -> s.getHoverName().getString());
+            case NAME -> Comparator.comparing((ItemStack s) -> s.getHoverName().getString());
+            case MOD -> Comparator.<ItemStack, String>comparing(s -> BuiltInRegistries.ITEM.getKey(s.getItem()).getNamespace())
+                    .thenComparing(s -> s.getHoverName().getString());
         };
 
         if (!ascending) {
@@ -64,7 +85,11 @@ public class StorageNetworkManager {
                 }
             } else if (filter.startsWith("#")) {
                 String tag = filter.substring(1);
+                //? >= 26.1 {
+                /*boolean matches = stack.typeHolder().tags().anyMatch(t -> t.location ().toString().toLowerCase().contains(tag));
+                *///?} < 26.1 {
                 boolean matches = stack.getTags().anyMatch(t -> t.location().toString().toLowerCase().contains(tag));
+                //?}
                 if (matches) {
                     result.add(stack);
                 }
@@ -83,9 +108,15 @@ public class StorageNetworkManager {
         if (stack.isEmpty()) return ItemStack.EMPTY;
         ItemStack remaining = stack.copy();
 
-        // 1. First pass: try merging into existing stacks
+        // 1. First pass: merge into existing partial stacks across all units
         for (StorageUnitBlockEntity unit : units) {
-            remaining = unit.insertStack(remaining);
+            remaining = unit.insertStackMergeOnly(remaining);
+            if (remaining.isEmpty()) return ItemStack.EMPTY;
+        }
+
+        // 2. Second pass: put into empty slots across all units
+        for (StorageUnitBlockEntity unit : units) {
+            remaining = unit.insertStackEmptyOnly(remaining);
             if (remaining.isEmpty()) return ItemStack.EMPTY;
         }
 

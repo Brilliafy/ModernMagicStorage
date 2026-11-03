@@ -23,11 +23,14 @@ rootProject.name = "ModernMagicStorage"
 stonecutter {
 	create(rootProject) {
 		fun match(version: String, vararg loaders: String) =
-			loaders.forEach { version("$version-$it", version).buildscript = "build.$it.gradle.kts" }
+			loaders.forEach {
+				val script = if (it == "neoforge" && version == "1.20.1") "build.neoforge120.gradle.kts" else "build.$it.gradle.kts"
+				version("$version-$it", version).buildscript = script
+			}
 
 		match("26.3", "fabric", "neoforge")
 		match("1.21.1", "fabric", "neoforge")
-		match("1.20.1", "fabric", "forge")
+		match("1.20.1", "fabric", "forge", "neoforge")
 
 		vcsVersion = "1.21.1-fabric"
 	}

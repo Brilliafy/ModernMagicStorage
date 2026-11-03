@@ -38,7 +38,7 @@ public class ModBlocks {
 
     // 8 Storage Unit tiers
     public static final Block STORAGE_UNIT_BASIC = register("storage_unit_basic", new BlockStorageUnit(
-            0, 36, BlockBehaviour.Properties.of().strength(2.5f, 5.0f).sound(SoundType.METAL)));
+            0, 54, BlockBehaviour.Properties.of().strength(2.5f, 5.0f).sound(SoundType.METAL)));
 
     public static final Block STORAGE_UNIT_CRIMTANE = register("storage_unit_crimtane", new BlockStorageUnit(
             1, 54, BlockBehaviour.Properties.of().strength(3.0f, 6.0f).sound(SoundType.METAL)));
@@ -62,11 +62,7 @@ public class ModBlocks {
             7, 360, BlockBehaviour.Properties.of().strength(6.0f, 12.0f).sound(SoundType.METAL)));
 
     private static <T extends Block> T register(String name, T block) {
-        //? > 1.19.2 {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
-        //?} <= 1.19.2 {
-        /*ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        *///?}
+        ResourceLocation id = Constants.id(name);
         BLOCKS.put(id, block);
         return block;
     }

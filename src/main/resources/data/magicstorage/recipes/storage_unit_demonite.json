@@ -10,12 +10,11 @@
       "item": "magicstorage:upgrade_demonite"
     },
     "S": {
-      "item": "magicstorage:storage_unit"
+      "item": "magicstorage:storage_unit_basic"
     }
   },
   "result": {
-    "item": "magicstorage:storage_unit",
-    "data": 2,
+    "item": "magicstorage:storage_unit_demonite",
     "count": 1
   }
 }

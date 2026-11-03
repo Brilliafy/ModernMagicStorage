@@ -2,15 +2,14 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "magicstorage:portable_access"
+      "item": "magicstorage:portable_access_hm"
     },
     {
       "item": "minecraft:crafting_table"
     }
   ],
   "result": {
-    "item": "magicstorage:portable_crafting_access",
-    "data": 1,
+    "item": "magicstorage:portable_crafting_access_hm",
     "count": 1
   }
 }

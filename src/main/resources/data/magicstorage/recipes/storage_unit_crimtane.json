@@ -10,12 +10,11 @@
       "item": "magicstorage:upgrade_crimtane"
     },
     "S": {
-      "item": "magicstorage:storage_unit"
+      "item": "magicstorage:storage_unit_basic"
     }
   },
   "result": {
-    "item": "magicstorage:storage_unit",
-    "data": 1,
+    "item": "magicstorage:storage_unit_crimtane",
     "count": 1
   }
 }

@@ -25,15 +25,24 @@ import net.minecraft.core.HolderLookup;
 public class StorageUnitBlockEntity extends BlockEntity implements Container, MenuProvider {
     private int capacity;
     private NonNullList<ItemStack> items;
+    private boolean suppressDrop = false;
 
     public StorageUnitBlockEntity(BlockPos pos, BlockState state) {
-        this(pos, state, state.getBlock() instanceof BlockStorageUnit u ? u.getCapacity() : 36);
+        this(pos, state, state.getBlock() instanceof BlockStorageUnit u ? u.getCapacity() : 54);
     }
 
     public StorageUnitBlockEntity(BlockPos pos, BlockState state, int capacity) {
         super(ModBlockEntities.STORAGE_UNIT, pos, state);
-        this.capacity = capacity > 0 ? capacity : 36;
+        this.capacity = capacity > 0 ? capacity : 54;
         this.items = NonNullList.withSize(this.capacity, ItemStack.EMPTY);
+    }
+
+    public boolean isSuppressDrop() {
+        return suppressDrop;
+    }
+
+    public void setSuppressDrop(boolean suppressDrop) {
+        this.suppressDrop = suppressDrop;
     }
 
     public int getCapacity() {
@@ -59,6 +68,7 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
             for (int i = 0; i < Math.min(oldItems.size(), newCapacity); i++) {
                 this.items.set(i, oldItems.get(i).copy());
             }
+            oldUnit.clearContent();
         }
         setChanged();
     }
@@ -75,9 +85,8 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
         return count;
     }
 
-    public ItemStack insertStack(ItemStack toInsert) {
+    public ItemStack insertStackMergeOnly(ItemStack toInsert) {
         if (toInsert.isEmpty()) return ItemStack.EMPTY;
-        // 1. Try to merge with existing stacks
         for (int i = 0; i < items.size(); i++) {
             ItemStack current = items.get(i);
             if (!current.isEmpty() && com.brilliafy.magicstorage.util.ItemHelper.canMerge(current, toInsert)) {
@@ -92,7 +101,11 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
                 }
             }
         }
-        // 2. Put into empty slot
+        return toInsert;
+    }
+
+    public ItemStack insertStackEmptyOnly(ItemStack toInsert) {
+        if (toInsert.isEmpty()) return ItemStack.EMPTY;
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i).isEmpty()) {
                 items.set(i, toInsert.copy());
@@ -102,6 +115,12 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
             }
         }
         return toInsert;
+    }
+
+    public ItemStack insertStack(ItemStack toInsert) {
+        ItemStack remaining = insertStackMergeOnly(toInsert);
+        if (remaining.isEmpty()) return ItemStack.EMPTY;
+        return insertStackEmptyOnly(remaining);
     }
 
     public ItemStack extractStack(ItemStack template, int maxCount) {
@@ -127,7 +146,23 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
         return result;
     }
 
-    //? > 1.20.1 {
+    //? >= 26.1 {
+    /*@Override
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        output.putInt("Capacity", capacity);
+        ContainerHelper.saveAllItems(output, items);
+    }
+
+    @Override
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        int cap = input.getIntOr("Capacity", 0);
+        if (cap > 0) this.capacity = cap;
+        this.items = NonNullList.withSize(this.capacity, ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(input, items);
+    }
+    *///?} < 26.1 && > 1.20.1 {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -206,7 +241,7 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
 
     @Override
     public void clearContent() {
-        items.clear();
+        java.util.Collections.fill(items, ItemStack.EMPTY);
         setChanged();
     }
 
@@ -220,4 +255,12 @@ public class StorageUnitBlockEntity extends BlockEntity implements Container, Me
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         return new StorageUnitMenu(containerId, playerInventory, this);
     }
+
+    //? >= 26.1 {
+    /*@Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (suppressDrop) return;
+        super.preRemoveSideEffects(pos, state);
+    }
+    *///?}
 }

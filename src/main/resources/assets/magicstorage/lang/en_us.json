@@ -5,6 +5,7 @@
   "block.magicstorage.storage_access": "Storage Access",
   "block.magicstorage.crafting_access": "Crafting Access Interface",
   "block.magicstorage.remote_access": "Remote Storage Access",
+  "block.magicstorage.storage_unit": "Storage Unit",
   "block.magicstorage.hell_brick": "Hell Bricks",
   "block.magicstorage.hellstone_ore": "Hellstone Ore",
   "block.magicstorage.luminite_ore": "Luminite Ore",
@@ -49,6 +50,16 @@
   "key.magicstorage.open_remote": "Open Remote",
   "key.category.magicstorage": "Magic Storage",
 
+  "gui.magicstorage.storage_access": "Storage Access",
+  "gui.magicstorage.crafting_access": "Crafting Access",
+  "gui.magicstorage.search": "Search items...",
+  "gui.magicstorage.remote_bound": "Wireless remote bound to Storage Heart at (%d, %d, %d).",
+  "gui.magicstorage.remote_not_bound": "Remote is not bound! Shift-right-click any block on your storage network to bind.",
+  "gui.magicstorage.remote_wrong_dimension": "The bound Storage Heart is in another dimension.",
+  "gui.magicstorage.remote_out_of_range": "The bound Storage Heart is out of range.",
+  "gui.magicstorage.remote_heart_missing": "Cannot find the bound Storage Heart.",
+  "gui.magicstorage.not_connected": "This terminal is not connected to a Storage Heart!",
+
   "gui.magicstorage.tooltip_clear": "Clear Search",
   "gui.magicstorage.shift": "Hold Shift for Filter Options",
   "gui.magicstorage.sort_quantity": "Sort: Quantity",
@@ -60,5 +71,17 @@
   "gui.magicstorage.jei_off": "JEI Sync: Disabled",
   "gui.magicstorage.autofill_full": "Autofill: Network & Inventory",
   "gui.magicstorage.autofill_network": "Autofill: Network Only",
-  "gui.magicstorage.autofill_off": "Autofill: Disabled"
+  "gui.magicstorage.autofill_off": "Autofill: Disabled",
+
+  "tooltip.magicstorage.remote_bound_to": "Bound to Storage Heart at (%d, %d, %d)",
+  "tooltip.magicstorage.remote_dimension": "Dimension: %s",
+  "tooltip.magicstorage.remote_range": "Range: %d blocks",
+  "tooltip.magicstorage.remote_range_infinite": "Range: Unlimited",
+  "tooltip.magicstorage.remote_cross_dimensional": "Cross-dimensional: Yes",
+  "tooltip.magicstorage.remote_unbound": "Not bound to a Storage Heart",
+  "tooltip.magicstorage.remote_bind_hint": "Shift-right-click a Storage Heart or network block to bind.",
+
+  "message.magicstorage.station_inserted": "Installed station: %s",
+  "message.magicstorage.station_removed": "Retrieved station: %s",
+  "message.magicstorage.stations_full": "Station slots are full (max 20)!"
 }

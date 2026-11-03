@@ -40,6 +40,7 @@ public class ItemStorageUpgrade extends Item {
         };
 
         BlockState newState = targetBlock.defaultBlockState();
+        unit.setSuppressDrop(true);
         level.setBlock(pos, newState, 3);
         if (level.getBlockEntity(pos) instanceof StorageUnitBlockEntity newUnit) {
             newUnit.copyContentsFrom(unit, targetCapacity);

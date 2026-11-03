@@ -7,10 +7,10 @@
   ],
   "key": {
     "N": {
-      "item": "minecraft:netherbrick"
+      "item": "minecraft:nether_brick"
     },
     "M": {
-      "item": "minecraft:magma"
+      "item": "minecraft:magma_block"
     }
   },
   "result": {

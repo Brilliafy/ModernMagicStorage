@@ -19,6 +19,14 @@ platform {
 		required("neoforge") {
 			forgeLikeVersionRange.set("[${prop("deps.neoforge")},)")
 		}
+		optional("jei") { slug("jei") }
+		optional("fairexperience") { slug("fair-experience", "fair-experience") }
+		if (sc.current.parsed < "26") {
+			optional("curios") { slug("curios") }
+			optional("apotheosis") { slug("apotheosis") }
+			optional("quality_equipment") { slug("quality-equipment", "quality-equipment") }
+			optional("reskillable") { slug("reskillable-reimagined", "reskillable-reimagined") }
+		}
 	}
 }
 
@@ -61,12 +69,18 @@ neoForge {
 
 repositories {
 	mavenCentral()
+	maven("https://maven.blamejared.com/") { name = "BlameJared" }
 	strictMaven("https://api.modrinth.com/maven", "maven.modrinth") { name = "Modrinth" }
 }
 
 dependencies {
 	compileOnly(libs.mixinextras.common)
 	annotationProcessor(libs.mixinextras.common)
+	if (sc.current.parsed >= "26") {
+		compileOnly("mezz.jei:jei-26.3-neoforge:31.12.0.66")
+	} else {
+		compileOnly("mezz.jei:jei-${sc.current.version}-neoforge:19.64.0.453")
+	}
 }
 
 tasks.named("createMinecraftArtifacts") {

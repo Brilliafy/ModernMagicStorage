@@ -1,7 +1,7 @@
 {
   "variants": {
-    "normal": {
-      "model": "magicstorage:luminite_ore"
+    "": {
+      "model": "magicstorage:block/luminite_ore"
     }
   }
 }

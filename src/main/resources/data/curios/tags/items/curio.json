@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "magicstorage:portable_access_prehm",
+    "magicstorage:portable_access_hm",
+    "magicstorage:portable_access_ultimate",
+    "magicstorage:portable_crafting_access_prehm",
+    "magicstorage:portable_crafting_access_hm",
+    "magicstorage:portable_crafting_access_ultimate"
+  ]
+}

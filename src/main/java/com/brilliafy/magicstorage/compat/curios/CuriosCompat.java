@@ -19,8 +19,10 @@ public class CuriosCompat {
     }
 
     public static boolean isReforger(ItemStack stack) {
-        if (!isLoaded() || stack.isEmpty()) return false;
+        if (stack.isEmpty()) return false;
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        return MOD_ID.equals(id.getNamespace()) && (id.getPath().contains("reforg") || id.getPath().contains("anvil"));
+        String ns = id.getNamespace();
+        return (MOD_ID.equals(ns) || "bountifulbaubles".equals(ns))
+                && (id.getPath().contains("reforg") || id.getPath().contains("anvil") || id.getPath().contains("token") || id.getPath().contains("tablet"));
     }
 }

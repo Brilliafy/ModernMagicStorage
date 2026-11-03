@@ -13,6 +13,8 @@ sealed class Loader(val id: String) {
 	abstract val excludedResources: List<String>
 
 	open val isFabricLike: Boolean = false
+	open val isLegacyForge: Boolean = false
+	open val mixinConfigAttribute: String? = null
 
 	abstract fun generateManifest(ctx: Context): String
 
@@ -58,7 +60,7 @@ sealed class Loader(val id: String) {
 				entrypoints = mapOf(
 					"main" to listOf("${ctx.modGroup}.${ctx.modId}.platform.fabric.FabricEntrypoint"),
 					"client" to listOf("${ctx.modGroup}.${ctx.modId}.platform.fabric.FabricClientEntrypoint"),
-					"fabric-datagen" to listOf("${ctx.modGroup}.${ctx.modId}.platform.fabric.datagen.FabricDataGeneratorEntrypoint")
+					"jei_mod_plugin" to listOf("${ctx.modGroup}.${ctx.modId}.compat.jei.MagicStorageJeiPlugin")
 				),
 				mixins = listOf("${ctx.modId}.mixins.json"),
 				depends = ctx.extension.dependencies.required.associate { it.modid.get() to it.fabricLikeVersionRange.get() },
@@ -84,7 +86,7 @@ sealed class Loader(val id: String) {
 						ForgeDependency(
 							modId = it.modid.get(),
 							side = it.environment.get().uppercase(Locale.ROOT),
-							versionRange = it.forgeLikeVersionRange.get(),
+							versionRange = it.forgeLikeVersionRange.get().ifBlank { "[0,)" },
 							mandatory = type == "required",
 							type = type
 						)
@@ -129,15 +131,24 @@ sealed class Loader(val id: String) {
 	}
 
 	object Forge : ForgeLike("forge") {
+		override val isLegacyForge = true
 		override val modManifestPath = "META-INF/mods.toml"
 		override val excludedResources = super.excludedResources + "META-INF/neoforge.mods.toml"
-		val mixinConfigAttribute = "MixinConfigs"
+		override val mixinConfigAttribute = "MixinConfigs"
+	}
+
+	object NeoForge120 : ForgeLike("neoforge") {
+		override val isLegacyForge = true
+		override val modManifestPath = "META-INF/mods.toml"
+		override val excludedResources = super.excludedResources + "META-INF/neoforge.mods.toml"
+		override val mixinConfigAttribute = "MixinConfigs"
 	}
 
 	companion object {
 		fun of(id: String): Loader = when (id) {
 			"fabric" -> Fabric
 			"neoforge" -> NeoForge
+			"neoforge120" -> NeoForge120
 			"forge" -> Forge
 			else -> error("Unknown loader: '$id'")
 		}

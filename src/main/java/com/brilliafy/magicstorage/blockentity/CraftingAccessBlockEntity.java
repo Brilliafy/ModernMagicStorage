@@ -33,6 +33,7 @@ public class CraftingAccessBlockEntity extends BlockEntity implements MenuProvid
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         StorageHeartBlockEntity heart = getConnectedHeart();
         if (heart != null) {
+            heart.catchUpVirtualFurnace(level);
             return new CraftingAccessMenu(containerId, playerInventory, heart);
         }
         return null;
